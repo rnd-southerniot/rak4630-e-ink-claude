@@ -187,18 +187,18 @@ static esp_err_t bmp280_read_calibration(void)
         return err;
     }
 
-    s_bmp280_calib.dig_T1 = (uint16_t)(buf[0] | (buf[1] << 8));
-    s_bmp280_calib.dig_T2 = (int16_t)(buf[2] | (buf[3] << 8));
-    s_bmp280_calib.dig_T3 = (int16_t)(buf[4] | (buf[5] << 8));
-    s_bmp280_calib.dig_P1 = (uint16_t)(buf[6] | (buf[7] << 8));
-    s_bmp280_calib.dig_P2 = (int16_t)(buf[8] | (buf[9] << 8));
-    s_bmp280_calib.dig_P3 = (int16_t)(buf[10] | (buf[11] << 8));
-    s_bmp280_calib.dig_P4 = (int16_t)(buf[12] | (buf[13] << 8));
-    s_bmp280_calib.dig_P5 = (int16_t)(buf[14] | (buf[15] << 8));
-    s_bmp280_calib.dig_P6 = (int16_t)(buf[16] | (buf[17] << 8));
-    s_bmp280_calib.dig_P7 = (int16_t)(buf[18] | (buf[19] << 8));
-    s_bmp280_calib.dig_P8 = (int16_t)(buf[20] | (buf[21] << 8));
-    s_bmp280_calib.dig_P9 = (int16_t)(buf[22] | (buf[23] << 8));
+    s_bmp280_calib.dig_T1 = (uint16_t)((uint16_t)buf[0] | ((uint16_t)buf[1] << 8));
+    s_bmp280_calib.dig_T2 = (int16_t)((uint16_t)buf[2] | ((uint16_t)buf[3] << 8));
+    s_bmp280_calib.dig_T3 = (int16_t)((uint16_t)buf[4] | ((uint16_t)buf[5] << 8));
+    s_bmp280_calib.dig_P1 = (uint16_t)((uint16_t)buf[6] | ((uint16_t)buf[7] << 8));
+    s_bmp280_calib.dig_P2 = (int16_t)((uint16_t)buf[8] | ((uint16_t)buf[9] << 8));
+    s_bmp280_calib.dig_P3 = (int16_t)((uint16_t)buf[10] | ((uint16_t)buf[11] << 8));
+    s_bmp280_calib.dig_P4 = (int16_t)((uint16_t)buf[12] | ((uint16_t)buf[13] << 8));
+    s_bmp280_calib.dig_P5 = (int16_t)((uint16_t)buf[14] | ((uint16_t)buf[15] << 8));
+    s_bmp280_calib.dig_P6 = (int16_t)((uint16_t)buf[16] | ((uint16_t)buf[17] << 8));
+    s_bmp280_calib.dig_P7 = (int16_t)((uint16_t)buf[18] | ((uint16_t)buf[19] << 8));
+    s_bmp280_calib.dig_P8 = (int16_t)((uint16_t)buf[20] | ((uint16_t)buf[21] << 8));
+    s_bmp280_calib.dig_P9 = (int16_t)((uint16_t)buf[22] | ((uint16_t)buf[23] << 8));
 
     s_bmp280_calib_valid = true;
     ESP_LOGI(TAG, "bmp280_calib_ok dig_T1=%u dig_T2=%d dig_T3=%d dig_P1=%u",

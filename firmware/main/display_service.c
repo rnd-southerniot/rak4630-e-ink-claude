@@ -398,23 +398,6 @@ esp_err_t display_service_render_hello_world(void)
     return ESP_OK;
 }
 
-esp_err_t display_service_render_white_clear(void)
-{
-    ESP_RETURN_ON_ERROR(display_service_init(), TAG, "display_init_failed");
-
-    ESP_LOGI(TAG, "white_clear_phase=1");
-    framebuffer_clear_white();
-    ESP_RETURN_ON_ERROR(display_flush(), TAG, "white_clear_flush_failed");
-
-    // Run two cycles for tri-color panels to settle to clean white.
-    ESP_LOGI(TAG, "white_clear_phase=2");
-    framebuffer_clear_white();
-    ESP_RETURN_ON_ERROR(display_flush(), TAG, "white_clear_flush_failed");
-
-    ESP_LOGI(TAG, "white_clear_ok");
-    return ESP_OK;
-}
-
 bool display_service_should_refresh(
     const sensor_sample_t *last_rendered,
     const sensor_sample_t *current,

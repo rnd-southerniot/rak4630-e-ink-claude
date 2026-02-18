@@ -9,7 +9,6 @@
 esp_err_t display_service_init(void);
 esp_err_t display_service_spi_bus_check(void);
 esp_err_t display_service_render_hello_world(void);
-esp_err_t display_service_render_white_clear(void);
 bool display_service_should_refresh(
     const sensor_sample_t *last_rendered,
     const sensor_sample_t *current,
