@@ -453,7 +453,7 @@ static void gate_tick_4(app_gate_ctx_t *ctx, uint64_t now_ms)
         }
     }
 
-    ctx->gate3_identity_ok = true;
+    ctx->identity_ok = true;
 
     if (expect_sgp40 && expect_bmp280) {
         sensor_sample_t sample = {0};
@@ -464,7 +464,7 @@ static void gate_tick_4(app_gate_ctx_t *ctx, uint64_t now_ms)
             return;
         }
 
-        const bool in_range = (sample.voc_index >= 0.0f && sample.voc_index <= 500.0f && sample.pressure_pa >= 80000.0f && sample.pressure_pa <= 120000.0f && sample.temperature_c >= -40.0f && sample.temperature_c <= 85.0f);
+        const bool in_range = (sample.voc_index >= 1.0f && sample.voc_index <= 500.0f && sample.pressure_pa >= 80000.0f && sample.pressure_pa <= 120000.0f && sample.temperature_c >= -40.0f && sample.temperature_c <= 85.0f);
         if (!in_range) {
             ctx->sensor_fail++;
             gate_log_fail(
@@ -497,7 +497,7 @@ static void gate_tick_4(app_gate_ctx_t *ctx, uint64_t now_ms)
             gate_log_fail(ctx, now_ms, "voc_only_fail expected=1 err=%s sensor_fail=%lu", esp_err_to_name(err), (unsigned long)ctx->sensor_fail);
             return;
         }
-        if (voc_index < 0.0f || voc_index > 500.0f) {
+        if (voc_index < 1.0f || voc_index > 500.0f) {
             ctx->sensor_fail++;
             gate_log_fail(ctx, now_ms, "voc_range_fail expected=1 voc=%.2f", voc_index);
             return;
@@ -528,7 +528,7 @@ static void gate_tick_4(app_gate_ctx_t *ctx, uint64_t now_ms)
             temperature_c);
     }
 
-    if (ctx->gate3_identity_ok && ctx->sensor_ok >= 3) {
+    if (ctx->identity_ok && ctx->sensor_ok >= 3) {
         gate_mark_pass(
             ctx,
             "sensor_pipeline_ok expected=%d identity=1 sensor_ok=%lu sensor_fail=%lu",

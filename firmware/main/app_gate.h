@@ -36,7 +36,7 @@ typedef struct {
     uint64_t last_refresh_ms;
 
     bool i2c_scan_done;
-    bool gate3_identity_ok;
+    bool identity_ok;
     bool gate5_uplink_done;
     bool gate6_backend_enabled;
     bool gate6_buffer_valid;
