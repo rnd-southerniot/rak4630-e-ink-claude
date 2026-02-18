@@ -18,7 +18,6 @@ static const char *TAG = "SENSOR";
 
 static bool s_sgp40_present;
 static bool s_bmp280_present;
-static uint32_t s_sample_seq;
 
 /* --- BMP280 calibration data (Bosch datasheet section 3.11.3) --- */
 typedef struct {
@@ -71,10 +70,16 @@ static esp_err_t sgp40_read_serial(sensor_identity_t *identity)
     static const uint8_t cmd[2] = {0x36, 0x82};
     uint8_t rx[9] = {0};
 
-    esp_err_t err = i2c_bus_write_read((uint8_t)CONFIG_APP_SGP40_ADDR, cmd, sizeof(cmd), rx, sizeof(rx));
+    esp_err_t err = i2c_bus_write((uint8_t)CONFIG_APP_SGP40_ADDR, cmd, sizeof(cmd));
+    if (err != ESP_OK) {
+        return err;
+    }
+    vTaskDelay(pdMS_TO_TICKS(1));
+
+    err = i2c_bus_read((uint8_t)CONFIG_APP_SGP40_ADDR, rx, sizeof(rx));
     if (err != ESP_OK) {
         uint8_t rx_short[6] = {0};
-        err = i2c_bus_write_read((uint8_t)CONFIG_APP_SGP40_ADDR, cmd, sizeof(cmd), rx_short, sizeof(rx_short));
+        err = i2c_bus_read((uint8_t)CONFIG_APP_SGP40_ADDR, rx_short, sizeof(rx_short));
         if (err != ESP_OK) {
             return err;
         }
@@ -106,7 +111,7 @@ static esp_err_t sgp40_read_serial(sensor_identity_t *identity)
 static float sgp40_raw_to_voc_index(uint16_t raw_signal)
 {
     if (!s_voc_algo_initialized) {
-        return 0.0f;
+        return -1.0f;
     }
     int32_t voc_index = 0;
     GasIndexAlgorithm_process(&s_voc_params, (int32_t)raw_signal, &voc_index);
@@ -462,8 +467,8 @@ esp_err_t sensor_service_read_basic_raw(uint32_t *pressure_raw, uint32_t *temper
         return err;
     }
 
-    *pressure_raw = (uint32_t)((raw[0] << 12) | (raw[1] << 4) | (raw[2] >> 4));
-    *temperature_raw = (uint32_t)((raw[3] << 12) | (raw[4] << 4) | (raw[5] >> 4));
+    *pressure_raw = ((uint32_t)raw[0] << 12) | ((uint32_t)raw[1] << 4) | ((uint32_t)raw[2] >> 4);
+    *temperature_raw = ((uint32_t)raw[3] << 12) | ((uint32_t)raw[4] << 4) | ((uint32_t)raw[5] >> 4);
 
     return ESP_OK;
 }
@@ -553,14 +558,13 @@ esp_err_t sensor_service_read(sensor_sample_t *sample)
     }
 
     const float battery_v = sensor_service_read_battery_v();
-    s_sample_seq++;
 
     sample->voc_index = voc;
     sample->pressure_pa = pressure_pa;
     sample->temperature_c = temperature_c;
     sample->battery_v = battery_v;
     sample->timestamp_ms = (uint64_t)(esp_timer_get_time() / 1000ULL);
-    sample->valid = (voc >= 0.0f && pressure_pa >= 80000.0f && pressure_pa <= 120000.0f && temperature_c >= -40.0f && temperature_c <= 85.0f);
+    sample->valid = (voc >= 1.0f && pressure_pa >= 80000.0f && pressure_pa <= 120000.0f && temperature_c >= -40.0f && temperature_c <= 85.0f);
 
     return sample->valid ? ESP_OK : ESP_ERR_INVALID_RESPONSE;
 }

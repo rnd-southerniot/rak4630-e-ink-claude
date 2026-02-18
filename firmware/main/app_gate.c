@@ -68,7 +68,7 @@ static bool gate9_sample_in_range(const sensor_sample_t *sample)
     }
 
     return (
-        sample->voc_index >= 0.0f && sample->voc_index <= 500.0f &&
+        sample->voc_index >= 1.0f && sample->voc_index <= 500.0f &&
         sample->pressure_pa >= 80000.0f && sample->pressure_pa <= 120000.0f &&
         sample->temperature_c >= -40.0f && sample->temperature_c <= 85.0f &&
         sample->battery_v >= 3.0f && sample->battery_v <= 5.0f);
@@ -583,7 +583,7 @@ static sensor_sample_t nominal_sample(uint64_t now_ms)
         .voc_index = 101.1f,
         .pressure_pa = 100950.0f,
         .temperature_c = 28.9f,
-        .battery_v = 3.95f,
+        .battery_v = sensor_service_read_battery_v(),
         .valid = true,
         .timestamp_ms = now_ms,
     };
