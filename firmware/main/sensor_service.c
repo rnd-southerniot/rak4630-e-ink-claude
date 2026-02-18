@@ -1,6 +1,5 @@
 #include "sensor_service.h"
 
-#include <math.h>
 #include <string.h>
 
 #include "esp_check.h"
@@ -295,8 +294,6 @@ esp_err_t sensor_service_init(void)
     found = false;
     ESP_RETURN_ON_ERROR(i2c_bus_probe((uint8_t)CONFIG_APP_BMP280_ADDR, &found), TAG, "bmp280_probe_error");
     s_bmp280_present = found;
-
-    s_sample_seq = 0;
 
     ESP_LOGI(
         TAG,
