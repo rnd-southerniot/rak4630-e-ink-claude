@@ -599,11 +599,11 @@ static void gate_tick_6(app_gate_ctx_t *ctx, uint64_t now_ms)
         ctx->has_latest_sample = true;
     }
 
-    if (!ctx->gate5_uplink_done && lorawan_service_is_joined()) {
+    if (!ctx->uplink_done && lorawan_service_is_joined()) {
         ctx->latest_payload_len = app_payload_encode_v1(&ctx->latest_sample, ctx->latest_payload, sizeof(ctx->latest_payload));
         esp_err_t err = lorawan_service_send(ctx->latest_payload, ctx->latest_payload_len);
         if (err == ESP_OK) {
-            ctx->gate5_uplink_done = true;
+            ctx->uplink_done = true;
         } else {
             gate_log_fail(ctx, now_ms, "uplink_fail err=%s", esp_err_to_name(err));
         }
@@ -632,27 +632,27 @@ static void gate_tick_6(app_gate_ctx_t *ctx, uint64_t now_ms)
 
 static void gate_tick_7(app_gate_ctx_t *ctx, uint64_t now_ms)
 {
-    if (!ctx->gate6_backend_enabled && (now_ms - ctx->start_ms) >= (uint64_t)CONFIG_APP_GATE6_BACKEND_ENABLE_DELAY_MS) {
+    if (!ctx->backend_enabled && (now_ms - ctx->start_ms) >= (uint64_t)CONFIG_APP_GATE6_BACKEND_ENABLE_DELAY_MS) {
         ESP_ERROR_CHECK(lorawan_service_set_backend_active(true));
-        ctx->gate6_backend_enabled = true;
+        ctx->backend_enabled = true;
     }
 
     lorawan_service_process(now_ms);
 
-    if (!ctx->gate6_buffer_valid) {
+    if (!ctx->buffer_valid) {
         const sensor_sample_t s = nominal_sample(now_ms);
         ctx->latest_payload_len = app_payload_encode_v1(&s, ctx->latest_payload, sizeof(ctx->latest_payload));
-        ctx->gate6_buffer_valid = (ctx->latest_payload_len == APP_PAYLOAD_V1_LEN);
-        if (ctx->gate6_buffer_valid) {
+        ctx->buffer_valid = (ctx->latest_payload_len == APP_PAYLOAD_V1_LEN);
+        if (ctx->buffer_valid) {
             ctx->buffered_count++;
             ESP_LOGI(TAG, "gate=7 buffer_store bytes=%lu", (unsigned long)ctx->latest_payload_len);
         }
     }
 
-    if (ctx->gate6_buffer_valid && lorawan_service_is_joined()) {
+    if (ctx->buffer_valid && lorawan_service_is_joined()) {
         esp_err_t err = lorawan_service_send(ctx->latest_payload, ctx->latest_payload_len);
         if (err == ESP_OK) {
-            ctx->gate6_buffer_valid = false;
+            ctx->buffer_valid = false;
             ctx->flushed_count++;
             ESP_LOGI(TAG, "gate=7 buffer_flush_ok flushed_count=%lu", (unsigned long)ctx->flushed_count);
         }
