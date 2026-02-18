@@ -1,0 +1,15 @@
+idf_component_register(
+    SRCS
+        "app_main.c"
+        "app_gate.c"
+        "gate_id_map.c"
+        "app_payload.c"
+        "heartbeat.c"
+        "i2c_bus.c"
+        "sensor_service.c"
+        "display_service.c"
+        "display_epd_ssd1680.c"
+        "lorawan_service.c"
+    INCLUDE_DIRS
+        "."
+)

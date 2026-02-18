@@ -1,0 +1,11 @@
+# ESP-IDF build outputs
+firmware/build/
+firmware/sdkconfig
+firmware/sdkconfig.old
+tests/host/.build/
+
+# Local editor files
+
+.DS_Store
+
+firmware/.env

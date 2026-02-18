@@ -1,0 +1,276 @@
+menu "RAK4630 E-Ink Node"
+
+config APP_GATE
+    int "Bring-up gate selector (0..9, plus 21 for Gate 2.1)"
+    range 0 21
+    default 1
+    help
+        Select exactly one gate to execute. Firmware stops after PASS and waits for gate change.
+        Use 21 as Gate 2.1 (I2C smoke) while keeping Gate 2 as E-Ink smoke.
+
+choice APP_GATE_ID_SCHEME
+    prompt "Gate ID scheme"
+    default APP_GATE_ID_SCHEME_NEW
+    help
+        Select gate ID numbering mode. New mode uses canonical Gate 0..9 plus Gate 2.1 (id 21).
+        Legacy mode accepts historical Gate 0..8 mapping and translates to canonical IDs.
+
+config APP_GATE_ID_SCHEME_NEW
+    bool "Canonical gate IDs (0..9 + 21 for Gate 2.1)"
+
+config APP_GATE_ID_SCHEME_LEGACY
+    bool "Legacy gate IDs (0..8) with translation"
+
+endchoice
+
+config APP_GATE_ID_SCHEME
+    int
+    default 0 if APP_GATE_ID_SCHEME_NEW
+    default 1 if APP_GATE_ID_SCHEME_LEGACY
+    help
+        0=new, 1=legacy. Hidden helper for deterministic logging/debug.
+
+config APP_GATE_LEGACY
+    int "Legacy gate selector (0..8)"
+    range 0 8
+    default 8
+    depends on APP_GATE_ID_SCHEME_LEGACY
+    help
+        Used only when legacy gate ID scheme is selected.
+
+config APP_GATE2P1_EXPECTED_DEVICES
+    int "Gate2.1 expected I2C devices (1=SGP40, 2=BMP280, 3=both)"
+    range 1 3
+    default 3
+
+config APP_GATE_TICK_MS
+    int "Gate runner tick period (ms)"
+    range 50 5000
+    default 200
+
+config APP_GATE_IDLE_LOG_SEC
+    int "Hold-mode status log interval after PASS (sec)"
+    range 1 3600
+    default 10
+
+config APP_GATE_SAMPLE_PERIOD_MS
+    int "Gate sampling period (ms)"
+    range 100 600000
+    default 1000
+
+config APP_GATE_UPLINK_PERIOD_MS
+    int "Gate uplink period (ms)"
+    range 100 600000
+    default 1000
+
+config APP_GATE6_BACKEND_ENABLE_DELAY_MS
+    int "Gate6 backend enable delay (ms)"
+    range 1000 600000
+    default 8000
+
+config APP_HEARTBEAT_GPIO
+    int "Heartbeat LED GPIO"
+    default 46
+    help
+        GPIO used for heartbeat LED. Set to -1 to disable LED toggling.
+
+config APP_I2C_PORT
+    int "I2C port number"
+    range 0 1
+    default 0
+
+config APP_I2C_SDA_GPIO
+    int "I2C SDA GPIO"
+    default 9
+
+config APP_I2C_SCL_GPIO
+    int "I2C SCL GPIO"
+    default 40
+
+config APP_I2C_FREQ_HZ
+    int "I2C bus frequency (Hz)"
+    range 10000 400000
+    default 100000
+
+config APP_SGP40_ADDR
+    hex "SGP40 I2C address"
+    default 0x59
+
+config APP_BMP280_ADDR
+    hex "BMP280 I2C address"
+    default 0x76
+
+config APP_GATE3_EXPECTED_DEVICES
+    int "Gate3 expected I2C devices (1=SGP40, 2=BMP280, 3=both)"
+    range 1 3
+    default 3
+
+config APP_GATE4_EXPECTED_DEVICES
+    int "Gate4 expected sensors (1=SGP40, 2=BMP280, 3=both)"
+    range 1 3
+    default 3
+
+config APP_GATE9_EXPECTED_DEVICES
+    int "Gate9 selected sensors (1=SGP40, 2=BMP280, 3=both)"
+    range 1 3
+    default 3
+
+config APP_SAMPLE_PERIOD_SEC
+    int "Sensor sampling period (seconds)"
+    range 5 3600
+    default 300
+
+config APP_UPLINK_PERIOD_SEC
+    int "Uplink period (seconds)"
+    range 5 86400
+    default 300
+
+config APP_DISPLAY_MIN_REFRESH_SEC
+    int "Minimum display refresh spacing (seconds)"
+    range 1 86400
+    default 30
+
+config APP_REFRESH_VOC_DELTA_X100
+    int "VOC delta threshold (x100)"
+    range 1 10000
+    default 300
+    help
+        VOC delta threshold where 300 means 3.00 index units.
+
+config APP_REFRESH_PRESSURE_DELTA_PA
+    int "Pressure delta threshold (Pa)"
+    range 1 5000
+    default 50
+
+config APP_REFRESH_TEMP_DELTA_CENTI_C
+    int "Temperature delta threshold (centi-C)"
+    range 1 1000
+    default 50
+
+config APP_DISPLAY_LANDSCAPE
+    bool "Display orientation landscape"
+    default y
+
+choice APP_DISPLAY_PANEL_PROFILE
+    prompt "RAK14000 E-Ink panel profile"
+    default APP_DISPLAY_PANEL_PROFILE_SSD1680_250X122
+
+config APP_DISPLAY_PANEL_PROFILE_SSD1680_250X122
+    bool "SSD1680 250x122"
+
+config APP_DISPLAY_PANEL_PROFILE_SSD1680_212X104
+    bool "SSD1680 212x104"
+
+endchoice
+
+config APP_DISPLAY_PANEL_PROFILE
+    int
+    default 0 if APP_DISPLAY_PANEL_PROFILE_SSD1680_250X122
+    default 1 if APP_DISPLAY_PANEL_PROFILE_SSD1680_212X104
+    help
+        0=SSD1680_250X122, 1=SSD1680_212X104. Hidden helper for diagnostics.
+
+config APP_DISPLAY_SPI_HOST
+    int "Display SPI host (2=HSPI, 3=VSPI)"
+    range 2 3
+    default 2
+
+config APP_DISPLAY_SPI_MHZ
+    int "Display SPI clock (MHz)"
+    range 1 20
+    default 4
+
+config APP_DISPLAY_PIN_MOSI
+    int "Display MOSI GPIO"
+    default 11
+
+config APP_DISPLAY_PIN_MISO
+    int "Display MISO GPIO (-1 when unused)"
+    range -1 48
+    default -1
+
+config APP_DISPLAY_PIN_SCLK
+    int "Display SCLK GPIO"
+    default 13
+
+config APP_DISPLAY_PIN_CS
+    int "Display CS GPIO"
+    default 12
+
+config APP_DISPLAY_PIN_DC
+    int "Display DC GPIO"
+    default 21
+
+config APP_DISPLAY_PIN_RST
+    int "Display RST GPIO"
+    default -1
+
+config APP_DISPLAY_PIN_BUSY
+    int "Display BUSY GPIO"
+    default 42
+
+config APP_DISPLAY_PIN_PWR
+    int "Display power-enable GPIO"
+    default 14
+
+config APP_DISPLAY_XRAM_OFFSET
+    int "Display X RAM offset bytes"
+    range 0 8
+    default 0
+    help
+        SSD1680 panels on RAK14000 tri-color may require offset tuning (0 or 1).
+
+config APP_DISPLAY_BUSY_ACTIVE_HIGH
+    bool "Display BUSY active-high polarity"
+    default n
+    help
+        Set to y only if the panel asserts BUSY with logic high.
+        SSD1680 RAK14000 default is active-low (n).
+
+config APP_DISPLAY_PWR_ACTIVE_HIGH
+    bool "Display power-enable active-high polarity"
+    default y
+    help
+        Set to y when WB_IO2 high enables E-Ink power rail.
+        Set to n when WB_IO2 low enables power.
+
+config APP_DISPLAY_PWR_INPUT_PULLUP
+    bool "Drive display power pin as INPUT_PULLUP (RAK14000 style)"
+    default y
+    help
+        When enabled, WB_IO2 is configured as input with pull-up instead of push-pull output.
+        This matches common RAK14000 reference sketches.
+
+config APP_DISPLAY_PARTIAL_UPDATES
+    bool "Enable display partial update LUT"
+    default n
+
+config APP_DISPLAY_REQUIRE_BUSY_PULSE
+    bool "Require BUSY pulse for display gate PASS"
+    default n
+    help
+        Set to y to enforce BUSY pulse detection during Gate 2 smoke.
+        Keep n for panels where BUSY is not wired/reliable and time fallback is used.
+
+config APP_DISPLAY_REFRESH_FALLBACK_MS
+    int "Display refresh fallback delay (ms) when BUSY pulse is missing"
+    range 1000 30000
+    default 10000
+    help
+        Used when BUSY does not toggle. Tri-color panels often need a long full-refresh delay.
+
+config APP_LORAWAN_BACKEND_ACTIVE
+    bool "Enable LoRaWAN backend stub path"
+    default y
+
+config APP_LORAWAN_JOIN_BACKOFF_MS
+    int "LoRaWAN join retry backoff (ms)"
+    range 1000 600000
+    default 5000
+
+config APP_LORAWAN_JOIN_SUCCESS_DELAY_MS
+    int "LoRaWAN join success delay in stub (ms)"
+    range 500 60000
+    default 4000
+
+endmenu
