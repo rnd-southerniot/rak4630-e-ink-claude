@@ -9,6 +9,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "i2c_bus.h"
+#include "sensirion_gas_index_algorithm.h"
 #if CONFIG_APP_BATTERY_ADC_ENABLED
 #include "esp_adc/adc_oneshot.h"
 #endif
@@ -44,6 +45,10 @@ static int32_t s_bmp280_t_fine;
 static adc_oneshot_unit_handle_t s_adc_handle;
 static bool s_adc_initialized;
 #endif
+
+/* --- Sensirion VOC Gas Index Algorithm state --- */
+static GasIndexAlgorithmParams s_voc_params;
+static bool s_voc_algo_initialized;
 
 #define SGP40_MEASURE_RAW_DELAY_MS 35U
 #define SGP40_DEFAULT_RH_TICKS 0x8000U
@@ -100,17 +105,12 @@ static esp_err_t sgp40_read_serial(sensor_identity_t *identity)
 
 static float sgp40_raw_to_voc_index(uint16_t raw_signal)
 {
-    /* Simple bounded map for gate validation until full Sensirion VOC algorithm integration. */
-    const int32_t shifted = (int32_t)raw_signal - 20000;
-    if (shifted <= 0) {
+    if (!s_voc_algo_initialized) {
         return 0.0f;
     }
-
-    const int32_t scaled = (shifted * 500) / 40000;
-    if (scaled >= 500) {
-        return 500.0f;
-    }
-    return (float)scaled;
+    int32_t voc_index = 0;
+    GasIndexAlgorithm_process(&s_voc_params, (int32_t)raw_signal, &voc_index);
+    return (float)voc_index;
 }
 
 static esp_err_t sgp40_measure_raw_signal(uint16_t *raw_signal)
@@ -312,6 +312,12 @@ esp_err_t sensor_service_init(void)
         if (err != ESP_OK) {
             ESP_LOGW(TAG, "bmp280_calib_read_failed err=%s", esp_err_to_name(err));
         }
+    }
+
+    if (s_sgp40_present) {
+        GasIndexAlgorithm_init(&s_voc_params, GasIndexAlgorithm_ALGORITHM_TYPE_VOC);
+        s_voc_algo_initialized = true;
+        ESP_LOGI(TAG, "voc_algorithm_init_ok type=sensirion_gas_index version=" LIBRARY_VERSION_NAME);
     }
 
 #if CONFIG_APP_BATTERY_ADC_ENABLED

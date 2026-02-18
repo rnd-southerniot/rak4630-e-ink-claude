@@ -42,8 +42,8 @@ typedef struct {
     bool gate6_buffer_valid;
 
     uint32_t heartbeat_last_toggle;
-    uint32_t gate3_missing_sgp40;
-    uint32_t gate3_missing_bmp280;
+    uint32_t missing_sgp40_count;
+    uint32_t missing_bmp280_count;
     uint32_t sensor_ok;
     uint32_t sensor_fail;
     uint32_t payload_ok;

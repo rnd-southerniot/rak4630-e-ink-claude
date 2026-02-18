@@ -130,6 +130,15 @@ config APP_DISPLAY_MIN_REFRESH_SEC
     range 1 86400
     default 30
 
+config APP_DISPLAY_MAX_REFRESH_SEC
+    int "Maximum display refresh interval (seconds)"
+    range 60 86400
+    default 1800
+    help
+        Force a display refresh after this many seconds even if sensor
+        deltas have not exceeded thresholds. Prevents ghosting on E-Ink
+        panels and ensures the display shows current data.
+
 config APP_REFRESH_VOC_DELTA_X100
     int "VOC delta threshold (x100)"
     range 1 10000
