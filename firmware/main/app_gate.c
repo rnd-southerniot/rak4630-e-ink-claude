@@ -78,7 +78,7 @@ static void gate9_seed_sample_defaults(app_gate_ctx_t *ctx, sensor_sample_t *sam
 {
     memset(sample, 0, sizeof(*sample));
     sample->timestamp_ms = now_ms;
-    sample->battery_v = 3.95f;
+    sample->battery_v = sensor_service_read_battery_v();
     sample->voc_index = 100.0f;
     sample->pressure_pa = 101325.0f;
     sample->temperature_c = 25.0f;
@@ -505,22 +505,27 @@ static void gate_tick_4(app_gate_ctx_t *ctx, uint64_t now_ms)
         ctx->sensor_ok++;
         gate_log_progress(ctx, now_ms, "sensor_ok_count=%lu expected=1 voc=%.2f", (unsigned long)ctx->sensor_ok, voc_index);
     } else {
-        uint32_t pressure_raw = 0;
-        uint32_t temperature_raw = 0;
-        esp_err_t err = sensor_service_read_basic_raw(&pressure_raw, &temperature_raw);
+        float pressure_pa = 0.0f;
+        float temperature_c = 0.0f;
+        esp_err_t err = sensor_service_read_bmp280(&pressure_pa, &temperature_c);
         if (err != ESP_OK) {
             ctx->sensor_fail++;
-            gate_log_fail(ctx, now_ms, "bmp280_raw_fail expected=2 err=%s sensor_fail=%lu", esp_err_to_name(err), (unsigned long)ctx->sensor_fail);
+            gate_log_fail(ctx, now_ms, "bmp280_read_fail expected=2 err=%s sensor_fail=%lu", esp_err_to_name(err), (unsigned long)ctx->sensor_fail);
+            return;
+        }
+        if (pressure_pa < 80000.0f || pressure_pa > 120000.0f || temperature_c < -40.0f || temperature_c > 85.0f) {
+            ctx->sensor_fail++;
+            gate_log_fail(ctx, now_ms, "bmp280_range_fail expected=2 pressure=%.1f temp=%.2f", pressure_pa, temperature_c);
             return;
         }
         ctx->sensor_ok++;
         gate_log_progress(
             ctx,
             now_ms,
-            "sensor_ok_count=%lu expected=2 pressure_raw=%" PRIu32 " temp_raw=%" PRIu32,
+            "sensor_ok_count=%lu expected=2 pressure=%.1fPa temp=%.2fC",
             (unsigned long)ctx->sensor_ok,
-            pressure_raw,
-            temperature_raw);
+            pressure_pa,
+            temperature_c);
     }
 
     if (ctx->gate3_identity_ok && ctx->sensor_ok >= 3) {
