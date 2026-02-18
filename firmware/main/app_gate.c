@@ -116,14 +116,14 @@ static esp_err_t gate9_read_selected_sample(app_gate_ctx_t *ctx, uint64_t now_ms
     }
 
     if (expect_bmp280) {
-        uint32_t pressure_raw = 0;
-        uint32_t temperature_raw = 0;
-        esp_err_t err = sensor_service_read_basic_raw(&pressure_raw, &temperature_raw);
+        float pressure_pa = 0.0f;
+        float temperature_c = 0.0f;
+        esp_err_t err = sensor_service_read_bmp280(&pressure_pa, &temperature_c);
         if (err != ESP_OK) {
             return err;
         }
-        sample->pressure_pa = 90000.0f + (float)(pressure_raw % 25000U);
-        sample->temperature_c = 15.0f + ((float)(temperature_raw % 20000U) / 1000.0f);
+        sample->pressure_pa = pressure_pa;
+        sample->temperature_c = temperature_c;
     }
 
     sample->valid = gate9_sample_in_range(sample);
@@ -840,9 +840,28 @@ esp_err_t app_gate_init(app_gate_ctx_t *ctx)
     }
 
     if (gate_requires_sensor_init(ctx->selected)) {
-        esp_err_t err = sensor_service_init();
-        if (err != ESP_OK) {
-            ESP_LOGW(TAG, "sensor_init_warn err=%s", esp_err_to_name(err));
+        ESP_RETURN_ON_ERROR(sensor_service_init(), TAG, "sensor_init_failed");
+
+        if (ctx->selected == APP_GATE_4_SENSOR_PIPELINE) {
+            if (gate4_expect_sgp40() && !sensor_service_is_sgp40_present()) {
+                ESP_LOGE(TAG, "gate4_missing_required_sgp40 expected_devices=%d", CONFIG_APP_GATE4_EXPECTED_DEVICES);
+                return ESP_ERR_NOT_FOUND;
+            }
+            if (gate4_expect_bmp280() && !sensor_service_is_bmp280_present()) {
+                ESP_LOGE(TAG, "gate4_missing_required_bmp280 expected_devices=%d", CONFIG_APP_GATE4_EXPECTED_DEVICES);
+                return ESP_ERR_NOT_FOUND;
+            }
+        }
+
+        if (ctx->selected == APP_GATE_9_LIVE_PUBLISH) {
+            if (gate9_expect_sgp40() && !sensor_service_is_sgp40_present()) {
+                ESP_LOGE(TAG, "gate9_missing_required_sgp40 expected_devices=%d", CONFIG_APP_GATE9_EXPECTED_DEVICES);
+                return ESP_ERR_NOT_FOUND;
+            }
+            if (gate9_expect_bmp280() && !sensor_service_is_bmp280_present()) {
+                ESP_LOGE(TAG, "gate9_missing_required_bmp280 expected_devices=%d", CONFIG_APP_GATE9_EXPECTED_DEVICES);
+                return ESP_ERR_NOT_FOUND;
+            }
         }
     }
 

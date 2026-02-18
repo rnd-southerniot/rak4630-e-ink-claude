@@ -1,5 +1,7 @@
 #include "heartbeat.h"
 
+#include <stdatomic.h>
+
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -7,8 +9,8 @@
 
 static const char *TAG = "APP";
 
-static volatile uint32_t s_toggle_count;
-static volatile bool s_running;
+static _Atomic uint32_t s_toggle_count;
+static _Atomic bool s_running;
 
 static void heartbeat_task(void *arg)
 {

@@ -273,4 +273,37 @@ config APP_LORAWAN_JOIN_SUCCESS_DELAY_MS
     range 500 60000
     default 4000
 
+config APP_BATTERY_ADC_ENABLED
+    bool "Enable battery voltage ADC measurement"
+    default n
+    help
+        Enable real battery voltage measurement via ADC1. Requires a known
+        battery ADC pin with voltage divider. When disabled, a fixed default
+        voltage is reported.
+
+config APP_BATTERY_ADC_CHANNEL
+    int "Battery ADC1 channel (0-9)"
+    range 0 9
+    default 3
+    depends on APP_BATTERY_ADC_ENABLED
+    help
+        ADC1 channel connected to the battery voltage divider.
+
+config APP_BATTERY_DIVIDER_X100
+    int "Battery voltage divider ratio x100 (e.g. 200 = 2.0x)"
+    range 100 1000
+    default 200
+    depends on APP_BATTERY_ADC_ENABLED
+    help
+        Voltage divider ratio multiplied by 100. A 2:1 divider (halves voltage)
+        should be set to 200.
+
+config APP_BATTERY_DEFAULT_MV
+    int "Default battery voltage (mV) when ADC is disabled or fails"
+    range 3000 5000
+    default 3950
+    help
+        Fallback battery voltage in millivolts. Used when ADC measurement
+        is disabled or when an ADC read fails.
+
 endmenu
