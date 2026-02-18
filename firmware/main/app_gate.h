@@ -37,11 +37,10 @@ typedef struct {
 
     bool i2c_scan_done;
     bool identity_ok;
-    bool gate5_uplink_done;
-    bool gate6_backend_enabled;
-    bool gate6_buffer_valid;
+    bool uplink_done;
+    bool backend_enabled;
+    bool buffer_valid;
 
-    uint32_t heartbeat_last_toggle;
     uint32_t missing_sgp40_count;
     uint32_t missing_bmp280_count;
     uint32_t sensor_ok;
