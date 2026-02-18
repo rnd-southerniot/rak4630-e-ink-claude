@@ -433,6 +433,10 @@ bool display_service_should_refresh(
         return false;
     }
 
+    if (now_ms - last_refresh_ms >= (uint64_t)CONFIG_APP_DISPLAY_MAX_REFRESH_SEC * 1000ULL) {
+        return true;
+    }
+
     const float voc_delta = fabsf(current->voc_index - last_rendered->voc_index);
     const float pressure_delta = fabsf(current->pressure_pa - last_rendered->pressure_pa);
     const float temp_delta_centi = fabsf((current->temperature_c - last_rendered->temperature_c) * 100.0f);

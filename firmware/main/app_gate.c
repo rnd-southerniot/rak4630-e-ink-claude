@@ -335,10 +335,10 @@ static void gate_tick_2p1(app_gate_ctx_t *ctx, uint64_t now_ms)
     }
 
     if (expect_sgp40 && !sgp40) {
-        ctx->gate3_missing_sgp40++;
+        ctx->missing_sgp40_count++;
     }
     if (expect_bmp280 && !bmp280) {
-        ctx->gate3_missing_bmp280++;
+        ctx->missing_bmp280_count++;
     }
 
     gate_log_progress(
@@ -348,8 +348,8 @@ static void gate_tick_2p1(app_gate_ctx_t *ctx, uint64_t now_ms)
         CONFIG_APP_GATE2P1_EXPECTED_DEVICES,
         sgp40,
         bmp280,
-        (unsigned long)ctx->gate3_missing_sgp40,
-        (unsigned long)ctx->gate3_missing_bmp280);
+        (unsigned long)ctx->missing_sgp40_count,
+        (unsigned long)ctx->missing_bmp280_count);
 
     const bool pass_sgp40 = (!expect_sgp40 || sgp40);
     const bool pass_bmp280 = (!expect_bmp280 || bmp280);
@@ -389,10 +389,10 @@ static void gate_tick_3(app_gate_ctx_t *ctx, uint64_t now_ms)
     }
 
     if (expect_sgp40 && !sgp40) {
-        ctx->gate3_missing_sgp40++;
+        ctx->missing_sgp40_count++;
     }
     if (expect_bmp280 && !bmp280) {
-        ctx->gate3_missing_bmp280++;
+        ctx->missing_bmp280_count++;
     }
 
     gate_log_progress(
@@ -402,8 +402,8 @@ static void gate_tick_3(app_gate_ctx_t *ctx, uint64_t now_ms)
         CONFIG_APP_GATE3_EXPECTED_DEVICES,
         sgp40,
         bmp280,
-        (unsigned long)ctx->gate3_missing_sgp40,
-        (unsigned long)ctx->gate3_missing_bmp280);
+        (unsigned long)ctx->missing_sgp40_count,
+        (unsigned long)ctx->missing_bmp280_count);
 
     const bool pass_sgp40 = (!expect_sgp40 || sgp40);
     const bool pass_bmp280 = (!expect_bmp280 || bmp280);
