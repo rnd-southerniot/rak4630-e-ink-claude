@@ -10,6 +10,7 @@ idf_component_register(
         "display_service.c"
         "display_epd_ssd1680.c"
         "lorawan_service.c"
+        "sensirion_gas_index_algorithm.c"
     INCLUDE_DIRS
         "."
 )

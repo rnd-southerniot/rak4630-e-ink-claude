@@ -15,14 +15,14 @@ Pick expected devices before run:
 ## Commands (Prompt/CLI)
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 3 --gate3-devices 1
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 3 --gate3-devices 1
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 ```
 
 One-command shortcut:
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/run_gate_3_i2c_presence.sh /dev/cu.usbmodem1101 1
+examples/gates/run_gate_3_i2c_presence.sh /dev/cu.usbmodem1101 1
 ```
 
 ## Expected Markers
@@ -43,6 +43,6 @@ Gate 3 validates bus presence only.
 For actual SGP40 sensor data (`SENSOR: sgp40_data raw=... voc_index=...`), run Gate 4 in SGP40-only mode:
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 4 --gate4-devices 1
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 4 --gate4-devices 1
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 ```

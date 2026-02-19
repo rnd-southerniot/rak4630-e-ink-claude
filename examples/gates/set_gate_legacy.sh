@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
 if [[ $# -ne 1 ]]; then
   echo "usage: $0 <legacy_gate:0..8>"
   exit 1
@@ -12,7 +15,7 @@ if ! [[ "$LEGACY" =~ ^[0-9]$ ]] || [[ "$LEGACY" -gt 8 ]]; then
   exit 1
 fi
 
-SDK="/Users/arif/rak4630-e-ink/firmware/sdkconfig"
+SDK="$REPO_ROOT/firmware/sdkconfig"
 
 set_value() {
   local key="$1"

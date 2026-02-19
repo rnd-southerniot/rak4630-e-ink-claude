@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
 if [[ $# -lt 1 ]]; then
   echo "usage: $0 <gate:0..9|2.1|21> [--gate2p1-devices 1|2|3] [--gate3-devices 1|2|3] [--gate4-devices 1|2|3] [--gate9-devices 1|2|3]"
   exit 1
@@ -19,7 +22,7 @@ if ! [[ "$GATE" =~ ^[0-9]+$ ]] || { [[ "$GATE" -gt 9 ]] && [[ "$GATE" -ne 21 ]];
   exit 1
 fi
 
-SDK="/Users/arif/rak4630-e-ink/firmware/sdkconfig"
+SDK="$REPO_ROOT/firmware/sdkconfig"
 
 set_value() {
   local key="$1"

@@ -11,7 +11,7 @@ Use this when canonical gate runs (`0..9`) fail.
 
 Always verify:
 
-- `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+- `docs/11-pin-mapping-rak3312-rak19007.md`
 
 ## 2) Gate 1 (Heartbeat)
 
@@ -46,7 +46,7 @@ Before Gate 6, Gate 7, and Gate 9:
 
 1. Ask for `DEVEUI` and `APPKEY`.
 2. Use `JOINEUI=0000000000000000` default.
-3. Keep values in `/Users/arif/rak4630-e-ink/firmware/.env` only.
+3. Keep values in `firmware/.env` only.
 
 ## 6) Gate 9 Stuck Condition
 

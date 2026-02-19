@@ -2,10 +2,15 @@
 firmware/build/
 firmware/sdkconfig
 firmware/sdkconfig.old
+firmware/.cache/
 tests/host/.build/
 
-# Local editor files
+# PlatformIO build outputs
+pio/.pio/
 
+# Local editor files
+.vscode/
 .DS_Store
 
+# Secrets
 firmware/.env

@@ -12,19 +12,19 @@ From pin mapping source-of-truth:
 - Alternate heartbeat LED: `GPIO45` (`LED_BLUE`)
 
 Reference:
-- `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+- `docs/11-pin-mapping-rak3312-rak19007.md`
 
 ## Commands (Prompt/CLI)
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 1
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 1
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 ```
 
 One-command shortcut:
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/run_gate_1_heartbeat.sh /dev/cu.usbmodem1101
+examples/gates/run_gate_1_heartbeat.sh /dev/cu.usbmodem1101
 ```
 
 ## Expected Markers

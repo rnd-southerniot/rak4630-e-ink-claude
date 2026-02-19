@@ -85,7 +85,7 @@ Hard policy:
 ## 5) Operating Rules for All Agents
 
 - Check pin mapping before every hardware-relevant gate:
-  - `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+  - `docs/11-pin-mapping-rak3312-rak19007.md`
 - Ask for/verify OTAA credentials for Gate 6/7/9:
   - `DEVEUI`, `APPKEY`, default `JOINEUI=0000000000000000`
 - Keep secrets out of logs and commits (`.env` must not be committed).
@@ -103,13 +103,13 @@ For each gate touched, produce all of:
 1. Code changes (if any)
 2. Reusable gate example artifacts (doc + one-command script where applicable)
 3. Updated operator docs:
-- `/Users/arif/rak4630-e-ink/docs/BRINGUP_PLAN.md`
-- `/Users/arif/rak4630-e-ink/docs/GATE_RUN_INSTRUCTIONS.md`
-- `/Users/arif/rak4630-e-ink/docs/USERINSTRUCTION_GATES.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/README.md`
+- `docs/BRINGUP_PLAN.md`
+- `docs/GATE_RUN_INSTRUCTIONS.md`
+- `docs/USERINSTRUCTION_GATES.md`
+- `examples/gates/README.md`
 4. Evidence updates:
-- `/Users/arif/rak4630-e-ink/docs/GATE_EXECUTION_LOG.md`
-- `/Users/arif/rak4630-e-ink/docs/CHECKLIST_GATES_0_TO_9.md`
+- `docs/GATE_EXECUTION_LOG.md`
+- `docs/CHECKLIST_GATES_0_TO_9.md`
 5. Test updates (host/on-device) when behavior changes.
 
 ---
@@ -166,7 +166,7 @@ Locked context:
 - FUOTA emergency-only, rollback required, max downtime 30 min
 
 Must follow:
-1) Check pin mapping before each hardware gate using /Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md
+1) Check pin mapping before each hardware gate using docs/11-pin-mapping-rak3312-rak19007.md
 2) For Gate 6/7/9 verify firmware/.env has DEVEUI + APPKEY (+ default JOINEUI)
 3) Run only selected gate; never auto-advance
 4) Require deterministic PASS marker and handshake stop marker

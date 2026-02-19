@@ -6,7 +6,7 @@ Validate pre-join payload buffering and post-join flush behavior with determinis
 
 ## Prerequisites
 
-- `/Users/arif/rak4630-e-ink/firmware/.env` exists with:
+- `firmware/.env` exists with:
   - `DEVEUI`
   - `APPKEY`
   - `JOINEUI=0000000000000000` (default)
@@ -14,14 +14,14 @@ Validate pre-join payload buffering and post-join flush behavior with determinis
 ## Commands (Prompt/CLI)
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 7
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 7
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 ```
 
 One-command shortcut:
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/run_gate_7_reliability_buffer.sh /dev/cu.usbmodem1101
+examples/gates/run_gate_7_reliability_buffer.sh /dev/cu.usbmodem1101
 ```
 
 ## Expected Markers

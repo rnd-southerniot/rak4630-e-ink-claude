@@ -7,14 +7,14 @@ Validate FUOTA service hooks and rollback policy markers before live publish.
 ## Commands (Prompt/CLI)
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 8
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 8
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 ```
 
 One-command shortcut:
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/run_gate_8_fuota_scaffold.sh /dev/cu.usbmodem1101
+examples/gates/run_gate_8_fuota_scaffold.sh /dev/cu.usbmodem1101
 ```
 
 ## Expected Markers

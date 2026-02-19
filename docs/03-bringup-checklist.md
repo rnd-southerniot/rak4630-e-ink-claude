@@ -20,7 +20,7 @@ Evidence:
 1. Run non-blocking heartbeat task (1 Hz recommended).
 2. Keep system running for at least 10 minutes.
 3. Optional reusable command:
-   - `/Users/arif/rak4630-e-ink/examples/gates/run_gate_1_heartbeat.sh /dev/cu.usbmodem1101`
+   - `examples/gates/run_gate_1_heartbeat.sh /dev/cu.usbmodem1101`
 
 Pass criteria:
 - Stable blink, no resets, no watchdog trip.

@@ -5,10 +5,10 @@ This guide explains how to use the two CTO-grade Codex templates in this repo.
 ## Templates
 
 1. Current project model template:
-- `/Users/arif/rak4630-e-ink/docs/CTO_CODEX_MULTI_AGENT_SUPER_PROMPT_TEMPLATE.md`
+- `docs/CTO_CODEX_MULTI_AGENT_SUPER_PROMPT_TEMPLATE.md`
 
 2. Architecture-model template (`core/hal/drivers/config/app/main.c`):
-- `/Users/arif/rak4630-e-ink/docs/CTO_CODEX_MULTI_AGENT_SUPER_PROMPT_TEMPLATE_ARCH_MODEL.md`
+- `docs/CTO_CODEX_MULTI_AGENT_SUPER_PROMPT_TEMPLATE_ARCH_MODEL.md`
 
 ## When To Use Which
 
@@ -52,7 +52,7 @@ Then paste the selected template prompt block and continue gate-by-gate.
 
 ```bash
 cat <<'PROMPT' | codex exec -C /Users/arif/rak4630-e-ink --sandbox workspace-write -
-Use /Users/arif/rak4630-e-ink/docs/CTO_CODEX_MULTI_AGENT_SUPER_PROMPT_TEMPLATE.md as the operating contract.
+Use docs/CTO_CODEX_MULTI_AGENT_SUPER_PROMPT_TEMPLATE.md as the operating contract.
 
 Current task:
 - Run Gate 9 in SGP40-only mode, capture PASS evidence, and update docs/checklist/log.
@@ -79,7 +79,7 @@ Optional:
 Use this prompt to continue delivery immediately:
 
 ```text
-Use /Users/arif/rak4630-e-ink/docs/CTO_CODEX_MULTI_AGENT_SUPER_PROMPT_TEMPLATE.md as the operating contract.
+Use docs/CTO_CODEX_MULTI_AGENT_SUPER_PROMPT_TEMPLATE.md as the operating contract.
 
 Current task:
 - Run a full quality pass on Gate 9 (SGP40-only mode), verify deterministic logs and display readability, then update all evidence docs.
@@ -103,7 +103,7 @@ Mandatory outputs:
 
 ```bash
 cat <<'PROMPT' | codex exec -C /Users/arif/rak4630-e-ink --sandbox workspace-write -
-Use /Users/arif/rak4630-e-ink/docs/CTO_CODEX_MULTI_AGENT_SUPER_PROMPT_TEMPLATE.md as the operating contract.
+Use docs/CTO_CODEX_MULTI_AGENT_SUPER_PROMPT_TEMPLATE.md as the operating contract.
 
 Current task:
 - Run a full quality pass on Gate 9 (SGP40-only mode), verify deterministic logs and display readability, then update all evidence docs.
@@ -129,7 +129,7 @@ PROMPT
 Use this when you want to start structural refactor with minimal behavior change:
 
 ```text
-Use /Users/arif/rak4630-e-ink/docs/CTO_CODEX_MULTI_AGENT_SUPER_PROMPT_TEMPLATE_ARCH_MODEL.md as the operating contract.
+Use docs/CTO_CODEX_MULTI_AGENT_SUPER_PROMPT_TEMPLATE_ARCH_MODEL.md as the operating contract.
 
 Current task:
 - Propose and execute Phase 1 architecture migration to:
@@ -151,7 +151,7 @@ Mandatory outputs:
 
 ```bash
 cat <<'PROMPT' | codex exec -C /Users/arif/rak4630-e-ink --sandbox workspace-write -
-Use /Users/arif/rak4630-e-ink/docs/CTO_CODEX_MULTI_AGENT_SUPER_PROMPT_TEMPLATE_ARCH_MODEL.md as the operating contract.
+Use docs/CTO_CODEX_MULTI_AGENT_SUPER_PROMPT_TEMPLATE_ARCH_MODEL.md as the operating contract.
 
 Current task:
 - Propose and execute Phase 1 architecture migration to:
