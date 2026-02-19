@@ -15,14 +15,14 @@ Pick expected sensors before run:
 ## Commands (Prompt/CLI)
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 4 --gate4-devices 1
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 4 --gate4-devices 1
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 ```
 
 One-command shortcut:
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/run_gate_4_sensor_pipeline.sh /dev/cu.usbmodem1101 1
+examples/gates/run_gate_4_sensor_pipeline.sh /dev/cu.usbmodem1101 1
 ```
 
 ## Expected Markers (SGP40-only)

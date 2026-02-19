@@ -69,13 +69,13 @@ This log tracks the required full rerun after inserting Gate 2 (`display_smoke`)
 
 ### Gate 6 (`lorawan_join_uplink`)
 
-- Credentials source: `/Users/arif/rak4630-e-ink/firmware/.env`
+- Credentials source: `firmware/.env`
 - Evidence lines:
 - Result: `PASS|FAIL`
 
 ### Gate 7 (`reliability_buffer`)
 
-- Credentials source: `/Users/arif/rak4630-e-ink/firmware/.env`
+- Credentials source: `firmware/.env`
 - Evidence lines:
 - Result: `PASS|FAIL`
 
@@ -89,7 +89,7 @@ This log tracks the required full rerun after inserting Gate 2 (`display_smoke`)
 
 - Prompt answer (`1|2|3`):
 - Config (`CONFIG_APP_GATE9_EXPECTED_DEVICES`):
-- Credentials source: `/Users/arif/rak4630-e-ink/firmware/.env`
+- Credentials source: `firmware/.env`
 - Visible sensor render confirmation:
 - Evidence lines:
   - `DISPLAY: render_data ...`
@@ -340,10 +340,10 @@ If legacy IDs are used, include mapping evidence line:
 ### Gate 1 (`heartbeat`) rerun
 
 - Pin precheck source:
-  - `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+  - `docs/11-pin-mapping-rak3312-rak19007.md`
   - Heartbeat primary: `GPIO46`
 - Reusable example:
-  - `/Users/arif/rak4630-e-ink/examples/gates/GATE_1_HEARTBEAT_EXAMPLE.md`
+  - `examples/gates/GATE_1_HEARTBEAT_EXAMPLE.md`
 - Config:
   - `CONFIG_APP_GATE=1`
 - Evidence:
@@ -360,7 +360,7 @@ If legacy IDs are used, include mapping evidence line:
 ### Gate 2 (`display_smoke`) rerun
 
 - Pin precheck source:
-  - `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+  - `docs/11-pin-mapping-rak3312-rak19007.md`
   - Gate 2 profile: `CS12/SCLK13/MOSI11/DC21/BUSY42/PWR14`, `XRAM_OFFSET=0`
 - Config:
   - `CONFIG_APP_GATE=2`
@@ -418,7 +418,7 @@ If legacy IDs are used, include mapping evidence line:
 ### Gate 2.1 (`i2c_smoke`) rerun (SGP40-only mode)
 
 - Pin precheck source:
-  - `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+  - `docs/11-pin-mapping-rak3312-rak19007.md`
   - I2C: `SDA=GPIO9`, `SCL=GPIO40`, `3V3` native
 - Prompt selection:
   - `1` (SGP40 only)
@@ -440,7 +440,7 @@ If legacy IDs are used, include mapping evidence line:
 ### Gate 3 (`i2c_presence`) rerun (SGP40-only mode)
 
 - Pin precheck source:
-  - `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+  - `docs/11-pin-mapping-rak3312-rak19007.md`
   - I2C: `SDA=GPIO9`, `SCL=GPIO40`, `3V3` native
 - Prompt selection:
   - `1` (SGP40 only)
@@ -462,7 +462,7 @@ If legacy IDs are used, include mapping evidence line:
 ### Gate 4 (`sensor_pipeline`) rerun (SGP40-only, real data path)
 
 - Pin precheck source:
-  - `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+  - `docs/11-pin-mapping-rak3312-rak19007.md`
   - I2C: `SDA=GPIO9`, `SCL=GPIO40`, `3V3` native
 - Prompt selection:
   - `1` (SGP40 only)
@@ -488,7 +488,7 @@ If legacy IDs are used, include mapping evidence line:
 ### Gate 5 (`payload_v1`) rerun
 
 - Pin precheck source:
-  - `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+  - `docs/11-pin-mapping-rak3312-rak19007.md`
   - Gate 5 is payload-only; no additional peripheral pin dependency.
 - Config:
   - `CONFIG_APP_GATE=5`
@@ -505,10 +505,10 @@ If legacy IDs are used, include mapping evidence line:
 ### Gate 6 (`lorawan_join_uplink`) rerun
 
 - Pin precheck source:
-  - `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+  - `docs/11-pin-mapping-rak3312-rak19007.md`
   - Core/radio seating unchanged (no additional external pin change for Gate 6).
 - Credentials precheck:
-  - `/Users/arif/rak4630-e-ink/firmware/.env` present with `DEVEUI`, `APPKEY`, `JOINEUI`.
+  - `firmware/.env` present with `DEVEUI`, `APPKEY`, `JOINEUI`.
   - Secret values intentionally not echoed in logs.
 - Config:
   - `CONFIG_APP_GATE=6`
@@ -528,10 +528,10 @@ If legacy IDs are used, include mapping evidence line:
 ### Gate 7 (`reliability_buffer`) rerun
 
 - Pin precheck source:
-  - `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+  - `docs/11-pin-mapping-rak3312-rak19007.md`
   - Core/radio seating unchanged (no additional external pin change for Gate 7).
 - Credentials precheck:
-  - `/Users/arif/rak4630-e-ink/firmware/.env` present with `DEVEUI`, `APPKEY`, `JOINEUI`.
+  - `firmware/.env` present with `DEVEUI`, `APPKEY`, `JOINEUI`.
   - Secret values intentionally not echoed in logs.
 - Config:
   - `CONFIG_APP_GATE=7`
@@ -552,7 +552,7 @@ If legacy IDs are used, include mapping evidence line:
 ### Gate 8 (`fuota_scaffold`) rerun
 
 - Pin precheck source:
-  - `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+  - `docs/11-pin-mapping-rak3312-rak19007.md`
   - Core/radio seating unchanged (no additional external pin change for Gate 8).
 - Config:
   - `CONFIG_APP_GATE=8`
@@ -571,12 +571,12 @@ If legacy IDs are used, include mapping evidence line:
 ### Gate 9 (`live_publish`) rerun (SGP40-only mode)
 
 - Pin precheck source:
-  - `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+  - `docs/11-pin-mapping-rak3312-rak19007.md`
   - Verified Gate 9 dependencies: I2C (`GPIO9/GPIO40`), display SPI/DC/BUSY/PWR profile, core/radio seating unchanged.
 - Prompt selection:
   - `1` (SGP40 only)
 - Credentials precheck:
-  - `/Users/arif/rak4630-e-ink/firmware/.env` present with `DEVEUI`, `APPKEY`, `JOINEUI`.
+  - `firmware/.env` present with `DEVEUI`, `APPKEY`, `JOINEUI`.
   - Secret values intentionally not echoed in logs.
 - Config:
   - `CONFIG_APP_GATE=9`
@@ -598,10 +598,10 @@ If legacy IDs are used, include mapping evidence line:
 
 - Trigger:
   - Added reusable example artifacts:
-    - `/Users/arif/rak4630-e-ink/examples/gates/GATE_9_LIVE_PUBLISH_EXAMPLE.md`
-    - `/Users/arif/rak4630-e-ink/examples/gates/run_gate_9_live_publish.sh`
+    - `examples/gates/GATE_9_LIVE_PUBLISH_EXAMPLE.md`
+    - `examples/gates/run_gate_9_live_publish.sh`
 - Command:
-  - `/Users/arif/rak4630-e-ink/examples/gates/run_gate_9_live_publish.sh /dev/cu.usbmodem1101 1`
+  - `examples/gates/run_gate_9_live_publish.sh /dev/cu.usbmodem1101 1`
 - Evidence:
   - `APP: gate_id_scheme=new selected=9`
   - `SENSOR: sgp40_data raw=31259 voc_index=140.00`
@@ -619,24 +619,24 @@ If legacy IDs are used, include mapping evidence line:
 - Trigger:
   - Requested reusable Gate 6 example and script.
 - Added:
-  - `/Users/arif/rak4630-e-ink/examples/gates/GATE_6_LORAWAN_JOIN_UPLINK_EXAMPLE.md`
-  - `/Users/arif/rak4630-e-ink/examples/gates/run_gate_6_lorawan_join_uplink.sh`
+  - `examples/gates/GATE_6_LORAWAN_JOIN_UPLINK_EXAMPLE.md`
+  - `examples/gates/run_gate_6_lorawan_join_uplink.sh`
 - Documentation sync:
-  - `/Users/arif/rak4630-e-ink/examples/gates/README.md`
-  - `/Users/arif/rak4630-e-ink/firmware/README.md`
-  - `/Users/arif/rak4630-e-ink/docs/BRINGUP_PLAN.md`
-  - `/Users/arif/rak4630-e-ink/docs/GATE_RUN_INSTRUCTIONS.md`
-  - `/Users/arif/rak4630-e-ink/docs/USERINSTRUCTION_GATES.md`
+  - `examples/gates/README.md`
+  - `firmware/README.md`
+  - `docs/BRINGUP_PLAN.md`
+  - `docs/GATE_RUN_INSTRUCTIONS.md`
+  - `docs/USERINSTRUCTION_GATES.md`
 - Result:
   - Gate 6 reusable workflow documented and executable with one command.
 
 ### Gate 7 (`reliability_buffer`) rerun (post Gate 6 example/doc update)
 
 - Pin precheck source:
-  - `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+  - `docs/11-pin-mapping-rak3312-rak19007.md`
   - Gate 7 dependency confirmed: core/radio seating unchanged.
 - Credentials precheck:
-  - `/Users/arif/rak4630-e-ink/firmware/.env` present with `DEVEUI`, `APPKEY`, `JOINEUI`.
+  - `firmware/.env` present with `DEVEUI`, `APPKEY`, `JOINEUI`.
   - Secret values intentionally not echoed in logs.
 - Config:
   - `CONFIG_APP_GATE=7`
@@ -660,21 +660,21 @@ If legacy IDs are used, include mapping evidence line:
 - Trigger:
   - Requested reusable Gate 7 example and script.
 - Added:
-  - `/Users/arif/rak4630-e-ink/examples/gates/GATE_7_RELIABILITY_BUFFER_EXAMPLE.md`
-  - `/Users/arif/rak4630-e-ink/examples/gates/run_gate_7_reliability_buffer.sh`
+  - `examples/gates/GATE_7_RELIABILITY_BUFFER_EXAMPLE.md`
+  - `examples/gates/run_gate_7_reliability_buffer.sh`
 - Documentation sync:
-  - `/Users/arif/rak4630-e-ink/examples/gates/README.md`
-  - `/Users/arif/rak4630-e-ink/firmware/README.md`
-  - `/Users/arif/rak4630-e-ink/docs/BRINGUP_PLAN.md`
-  - `/Users/arif/rak4630-e-ink/docs/GATE_RUN_INSTRUCTIONS.md`
-  - `/Users/arif/rak4630-e-ink/docs/USERINSTRUCTION_GATES.md`
+  - `examples/gates/README.md`
+  - `firmware/README.md`
+  - `docs/BRINGUP_PLAN.md`
+  - `docs/GATE_RUN_INSTRUCTIONS.md`
+  - `docs/USERINSTRUCTION_GATES.md`
 - Result:
   - Gate 7 reusable workflow documented and executable with one command.
 
 ### Gate 8 (`fuota_scaffold`) rerun (post Gate 7 example/doc update)
 
 - Pin precheck source:
-  - `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+  - `docs/11-pin-mapping-rak3312-rak19007.md`
   - Gate 8 dependency confirmed: core/radio seating unchanged.
 - Config:
   - `CONFIG_APP_GATE=8`
@@ -695,26 +695,26 @@ If legacy IDs are used, include mapping evidence line:
 - Trigger:
   - Requested reusable Gate 8 example and script.
 - Added:
-  - `/Users/arif/rak4630-e-ink/examples/gates/GATE_8_FUOTA_SCAFFOLD_EXAMPLE.md`
-  - `/Users/arif/rak4630-e-ink/examples/gates/run_gate_8_fuota_scaffold.sh`
+  - `examples/gates/GATE_8_FUOTA_SCAFFOLD_EXAMPLE.md`
+  - `examples/gates/run_gate_8_fuota_scaffold.sh`
 - Documentation sync:
-  - `/Users/arif/rak4630-e-ink/examples/gates/README.md`
-  - `/Users/arif/rak4630-e-ink/firmware/README.md`
-  - `/Users/arif/rak4630-e-ink/docs/BRINGUP_PLAN.md`
-  - `/Users/arif/rak4630-e-ink/docs/GATE_RUN_INSTRUCTIONS.md`
-  - `/Users/arif/rak4630-e-ink/docs/USERINSTRUCTION_GATES.md`
+  - `examples/gates/README.md`
+  - `firmware/README.md`
+  - `docs/BRINGUP_PLAN.md`
+  - `docs/GATE_RUN_INSTRUCTIONS.md`
+  - `docs/USERINSTRUCTION_GATES.md`
 - Result:
   - Gate 8 reusable workflow documented and executable with one command.
 
 ### Gate 9 (`live_publish`) rerun (post Gate 8 example/doc update, mode `1`)
 
 - Pin precheck source:
-  - `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+  - `docs/11-pin-mapping-rak3312-rak19007.md`
   - Verified Gate 9 dependencies: I2C (`GPIO9/GPIO40`), display SPI/DC/BUSY/PWR profile, core/radio seating unchanged.
 - Prompt/selection used:
   - `CONFIG_APP_GATE9_EXPECTED_DEVICES=1` (`SGP40` only).
 - Credentials precheck:
-  - `/Users/arif/rak4630-e-ink/firmware/.env` present with `DEVEUI`, `APPKEY`, `JOINEUI`.
+  - `firmware/.env` present with `DEVEUI`, `APPKEY`, `JOINEUI`.
   - Secret values intentionally not echoed in logs.
 - Config:
   - `CONFIG_APP_GATE=9`

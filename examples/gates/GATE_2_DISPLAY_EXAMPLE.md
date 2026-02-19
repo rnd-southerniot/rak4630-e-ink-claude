@@ -7,14 +7,14 @@ Validate RAK14000 SPI path, power control, SSD1680 init, and visible full-screen
 ## Commands (Prompt/CLI)
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 2
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 2
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 ```
 
 One-command shortcut:
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/run_gate_2_display.sh /dev/cu.usbmodem1101
+examples/gates/run_gate_2_display.sh /dev/cu.usbmodem1101
 ```
 
 ## Expected Markers

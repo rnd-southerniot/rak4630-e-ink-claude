@@ -15,14 +15,14 @@ Pick expected devices before run:
 ## Commands (Prompt/CLI)
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 2.1 --gate2p1-devices 3
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 2.1 --gate2p1-devices 3
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 ```
 
 One-command shortcut:
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/run_gate_2_1_i2c.sh /dev/cu.usbmodem1101 3
+examples/gates/run_gate_2_1_i2c.sh /dev/cu.usbmodem1101 3
 ```
 
 ## Expected Markers

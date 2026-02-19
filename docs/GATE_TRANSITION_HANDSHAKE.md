@@ -34,7 +34,7 @@ Legacy mapping:
 
 ## Preflight Before Every Gate
 
-1. Check `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`.
+1. Check `docs/11-pin-mapping-rak3312-rak19007.md`.
 2. Confirm only target gate hardware pins are in scope.
 3. Build, flash, monitor.
 4. Record PASS/FAIL evidence.

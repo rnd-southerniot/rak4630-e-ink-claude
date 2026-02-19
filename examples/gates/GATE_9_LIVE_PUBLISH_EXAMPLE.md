@@ -18,7 +18,7 @@ Pick expected sensors before run:
 
 ## Prerequisites
 
-- `/Users/arif/rak4630-e-ink/firmware/.env` exists with:
+- `firmware/.env` exists with:
   - `DEVEUI`
   - `APPKEY`
   - `JOINEUI=0000000000000000` (default)
@@ -26,14 +26,14 @@ Pick expected sensors before run:
 ## Commands (Prompt/CLI)
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 9 --gate9-devices 1
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 9 --gate9-devices 1
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 ```
 
 One-command shortcut:
 
 ```bash
-/Users/arif/rak4630-e-ink/examples/gates/run_gate_9_live_publish.sh /dev/cu.usbmodem1101 1
+examples/gates/run_gate_9_live_publish.sh /dev/cu.usbmodem1101 1
 ```
 
 ## Expected Markers (Mode `1`, SGP40-only)

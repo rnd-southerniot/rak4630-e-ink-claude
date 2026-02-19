@@ -2,7 +2,7 @@
 
 ## Preflight
 
-- [ ] Pin mapping reviewed in `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md`
+- [ ] Pin mapping reviewed in `docs/11-pin-mapping-rak3312-rak19007.md`
 - [ ] Canonical gate mode selected (`CONFIG_APP_GATE_ID_SCHEME_NEW=y`) unless legacy test intentionally enabled
 - [ ] Serial port confirmed
 - [ ] `.env` present for Gate 6/7/9 (with `DEVEUI`, `APPKEY`, default `JOINEUI`)
@@ -23,7 +23,7 @@
 
 ## Mandatory Artifacts
 
-- [ ] `/Users/arif/rak4630-e-ink/docs/GATE_EXECUTION_LOG.md` updated with evidence lines for each gate
+- [ ] `docs/GATE_EXECUTION_LOG.md` updated with evidence lines for each gate
 - [ ] Legacy mapping log captured if legacy mode used
 - [ ] Build matrix evidence captured (Gate 2 + Gate 2.1 + Gate 9, panel profiles as required)
 

@@ -11,89 +11,89 @@
 
 Reusable scripts:
 
-- `/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/set_gate_legacy.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/run_gate_1_heartbeat.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/run_gate_2_display.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/run_gate_2_1_i2c.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/run_gate_3_i2c_presence.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/run_gate_4_sensor_pipeline.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/run_gate_6_lorawan_join_uplink.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/run_gate_7_reliability_buffer.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/run_gate_8_fuota_scaffold.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/run_gate_9_live_publish.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_1_HEARTBEAT_EXAMPLE.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_2_DISPLAY_EXAMPLE.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_2_1_I2C_EXAMPLE.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_3_I2C_PRESENCE_EXAMPLE.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_4_SENSOR_PIPELINE_EXAMPLE.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_6_LORAWAN_JOIN_UPLINK_EXAMPLE.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_7_RELIABILITY_BUFFER_EXAMPLE.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_8_FUOTA_SCAFFOLD_EXAMPLE.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_9_LIVE_PUBLISH_EXAMPLE.md`
+- `examples/gates/set_gate_new.sh`
+- `examples/gates/set_gate_legacy.sh`
+- `examples/gates/run_gate.sh`
+- `examples/gates/run_gate_1_heartbeat.sh`
+- `examples/gates/run_gate_2_display.sh`
+- `examples/gates/run_gate_2_1_i2c.sh`
+- `examples/gates/run_gate_3_i2c_presence.sh`
+- `examples/gates/run_gate_4_sensor_pipeline.sh`
+- `examples/gates/run_gate_6_lorawan_join_uplink.sh`
+- `examples/gates/run_gate_7_reliability_buffer.sh`
+- `examples/gates/run_gate_8_fuota_scaffold.sh`
+- `examples/gates/run_gate_9_live_publish.sh`
+- `examples/gates/GATE_1_HEARTBEAT_EXAMPLE.md`
+- `examples/gates/GATE_2_DISPLAY_EXAMPLE.md`
+- `examples/gates/GATE_2_1_I2C_EXAMPLE.md`
+- `examples/gates/GATE_3_I2C_PRESENCE_EXAMPLE.md`
+- `examples/gates/GATE_4_SENSOR_PIPELINE_EXAMPLE.md`
+- `examples/gates/GATE_6_LORAWAN_JOIN_UPLINK_EXAMPLE.md`
+- `examples/gates/GATE_7_RELIABILITY_BUFFER_EXAMPLE.md`
+- `examples/gates/GATE_8_FUOTA_SCAFFOLD_EXAMPLE.md`
+- `examples/gates/GATE_9_LIVE_PUBLISH_EXAMPLE.md`
 
 Example commands:
 
 ```bash
 # Gate 1 heartbeat
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 1
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 1
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 
 # Gate 2 display smoke
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 2
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 2
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 
 # Gate 2.1 i2c smoke, both devices
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 2.1 --gate2p1-devices 3
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 2.1 --gate2p1-devices 3
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 
 # Gate 3, SGP40 only
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 3 --gate3-devices 1
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 3 --gate3-devices 1
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 
 # Gate 3 one-command shortcut (SGP40 only)
-/Users/arif/rak4630-e-ink/examples/gates/run_gate_3_i2c_presence.sh /dev/cu.usbmodem1101 1
+examples/gates/run_gate_3_i2c_presence.sh /dev/cu.usbmodem1101 1
 
 # Gate 4 SGP40 real data read
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 4 --gate4-devices 1
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 4 --gate4-devices 1
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 
 # Gate 4 one-command shortcut (SGP40 only)
-/Users/arif/rak4630-e-ink/examples/gates/run_gate_4_sensor_pipeline.sh /dev/cu.usbmodem1101 1
+examples/gates/run_gate_4_sensor_pipeline.sh /dev/cu.usbmodem1101 1
 
 # Gate 6 join + uplink (requires .env)
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 6
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 6
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 
 # Gate 6 one-command shortcut
-/Users/arif/rak4630-e-ink/examples/gates/run_gate_6_lorawan_join_uplink.sh /dev/cu.usbmodem1101
+examples/gates/run_gate_6_lorawan_join_uplink.sh /dev/cu.usbmodem1101
 
 # Gate 7 reliability buffer (requires .env)
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 7
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 7
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 
 # Gate 7 one-command shortcut
-/Users/arif/rak4630-e-ink/examples/gates/run_gate_7_reliability_buffer.sh /dev/cu.usbmodem1101
+examples/gates/run_gate_7_reliability_buffer.sh /dev/cu.usbmodem1101
 
 # Gate 8 FUOTA scaffold
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 8
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 8
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 
 # Gate 8 one-command shortcut
-/Users/arif/rak4630-e-ink/examples/gates/run_gate_8_fuota_scaffold.sh /dev/cu.usbmodem1101
+examples/gates/run_gate_8_fuota_scaffold.sh /dev/cu.usbmodem1101
 
 # Gate 9, both sensors
-/Users/arif/rak4630-e-ink/examples/gates/set_gate_new.sh 9 --gate9-devices 3
-/Users/arif/rak4630-e-ink/examples/gates/run_gate.sh /dev/cu.usbmodem1101
+examples/gates/set_gate_new.sh 9 --gate9-devices 3
+examples/gates/run_gate.sh /dev/cu.usbmodem1101
 
 # Gate 9 one-command shortcut (SGP40 only)
-/Users/arif/rak4630-e-ink/examples/gates/run_gate_9_live_publish.sh /dev/cu.usbmodem1101 1
+examples/gates/run_gate_9_live_publish.sh /dev/cu.usbmodem1101 1
 ```
 
 ## VSCode IDE Workflow
 
-Use tasks in `/Users/arif/rak4630-e-ink/.vscode/tasks.json`:
+Use tasks in `.vscode/tasks.json`:
 
 - `Gate: Set New ID`
 - `Gate: Set Legacy ID`
@@ -103,7 +103,7 @@ Use tasks in `/Users/arif/rak4630-e-ink/.vscode/tasks.json`:
 - `Gate: Run Gate 2 Display Smoke`
 - `Gate: Run Gate 2.1 I2C Smoke`
 
-Use launch profile in `/Users/arif/rak4630-e-ink/.vscode/launch.json`:
+Use launch profile in `.vscode/launch.json`:
 
 - `ESP-IDF Monitor (Gate Tags)`
 

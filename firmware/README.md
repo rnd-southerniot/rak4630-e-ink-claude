@@ -26,27 +26,27 @@ Policy:
 ```bash
 export IDF_PYTHON_ENV_PATH=/Users/arif/.espressif/python_env/idf5.5_py3.14_env
 source /Users/arif/esp/esp-idf/export.sh
-idf.py -C /Users/arif/rak4630-e-ink/firmware build
-idf.py -C /Users/arif/rak4630-e-ink/firmware -p /dev/cu.usbmodem1101 flash monitor
+idf.py -C firmware build
+idf.py -C firmware -p /dev/cu.usbmodem1101 flash monitor
 ```
 
 Reusable gate examples:
 
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_1_HEARTBEAT_EXAMPLE.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_2_DISPLAY_EXAMPLE.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_2_1_I2C_EXAMPLE.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_6_LORAWAN_JOIN_UPLINK_EXAMPLE.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_7_RELIABILITY_BUFFER_EXAMPLE.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/GATE_8_FUOTA_SCAFFOLD_EXAMPLE.md`
-- `/Users/arif/rak4630-e-ink/examples/gates/run_gate_1_heartbeat.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/run_gate_6_lorawan_join_uplink.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/run_gate_7_reliability_buffer.sh`
-- `/Users/arif/rak4630-e-ink/examples/gates/run_gate_8_fuota_scaffold.sh`
+- `examples/gates/GATE_1_HEARTBEAT_EXAMPLE.md`
+- `examples/gates/GATE_2_DISPLAY_EXAMPLE.md`
+- `examples/gates/GATE_2_1_I2C_EXAMPLE.md`
+- `examples/gates/GATE_6_LORAWAN_JOIN_UPLINK_EXAMPLE.md`
+- `examples/gates/GATE_7_RELIABILITY_BUFFER_EXAMPLE.md`
+- `examples/gates/GATE_8_FUOTA_SCAFFOLD_EXAMPLE.md`
+- `examples/gates/run_gate_1_heartbeat.sh`
+- `examples/gates/run_gate_6_lorawan_join_uplink.sh`
+- `examples/gates/run_gate_7_reliability_buffer.sh`
+- `examples/gates/run_gate_8_fuota_scaffold.sh`
 
 ## LoRaWAN .env (Gate 6/7/9)
 
-- Runtime credentials file: `/Users/arif/rak4630-e-ink/firmware/.env`
-- Template: `/Users/arif/rak4630-e-ink/firmware/.env.example`
+- Runtime credentials file: `firmware/.env`
+- Template: `firmware/.env.example`
 - Required values:
   - `DEVEUI`
   - `APPKEY`
@@ -56,7 +56,7 @@ Reusable gate examples:
 ## Host Tests
 
 ```bash
-/Users/arif/rak4630-e-ink/tests/host/run_tests.sh
+tests/host/run_tests.sh
 ```
 
 ## Modules

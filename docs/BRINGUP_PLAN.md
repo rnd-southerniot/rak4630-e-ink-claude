@@ -23,9 +23,9 @@
 
 ## Global Preconditions
 
-1. Check `/Users/arif/rak4630-e-ink/docs/11-pin-mapping-rak3312-rak19007.md` before each gate.
+1. Check `docs/11-pin-mapping-rak3312-rak19007.md` before each gate.
 2. Build from clean tree for each gate transition.
-3. Record evidence in `/Users/arif/rak4630-e-ink/docs/GATE_EXECUTION_LOG.md` and `/Users/arif/rak4630-e-ink/docs/CHECKLIST_GATES_0_TO_9.md`.
+3. Record evidence in `docs/GATE_EXECUTION_LOG.md` and `docs/CHECKLIST_GATES_0_TO_9.md`.
 
 ## Gate 0: env
 
@@ -39,8 +39,8 @@
 
 - Objective: LED heartbeat and liveness counter.
 - Steps: verify heartbeat pin mapping, set `CONFIG_APP_GATE=1`, run.
-  - Reusable command: `/Users/arif/rak4630-e-ink/examples/gates/run_gate_1_heartbeat.sh /dev/cu.usbmodem1101`
-  - Detailed example: `/Users/arif/rak4630-e-ink/examples/gates/GATE_1_HEARTBEAT_EXAMPLE.md`
+  - Reusable command: `examples/gates/run_gate_1_heartbeat.sh /dev/cu.usbmodem1101`
+  - Detailed example: `examples/gates/GATE_1_HEARTBEAT_EXAMPLE.md`
 - Expected logs: `APP: heartbeat_started ...`, `APP: result=PASS gate=1 ...`
 - Failure modes: wrong GPIO, LED not blinking, task not running.
 - PASS criteria: visible LED blink + PASS line.
@@ -109,8 +109,8 @@
   1. Ask for `DEVEUI` + `APPKEY` in `firmware/.env`.
   2. Keep `JOINEUI=0000000000000000` unless overridden.
   3. Set `CONFIG_APP_GATE=6`, run.
-  4. Reusable command: `/Users/arif/rak4630-e-ink/examples/gates/run_gate_6_lorawan_join_uplink.sh /dev/cu.usbmodem1101`
-  5. Detailed example: `/Users/arif/rak4630-e-ink/examples/gates/GATE_6_LORAWAN_JOIN_UPLINK_EXAMPLE.md`
+  4. Reusable command: `examples/gates/run_gate_6_lorawan_join_uplink.sh /dev/cu.usbmodem1101`
+  5. Detailed example: `examples/gates/GATE_6_LORAWAN_JOIN_UPLINK_EXAMPLE.md`
 - Expected logs: `LORAWAN: join_start`, `LORAWAN: join_success`, `LORAWAN: uplink_stub_ok`, `APP: result=PASS gate=6 ...`
 - Failure modes: backend inactive, join retries without success.
 - PASS criteria: joined + at least one uplink success.
@@ -121,8 +121,8 @@
 - Steps:
   1. Ask for `DEVEUI` + `APPKEY` in `firmware/.env`.
   2. Set `CONFIG_APP_GATE=7`, run.
-  3. Reusable command: `/Users/arif/rak4630-e-ink/examples/gates/run_gate_7_reliability_buffer.sh /dev/cu.usbmodem1101`
-  4. Detailed example: `/Users/arif/rak4630-e-ink/examples/gates/GATE_7_RELIABILITY_BUFFER_EXAMPLE.md`
+  3. Reusable command: `examples/gates/run_gate_7_reliability_buffer.sh /dev/cu.usbmodem1101`
+  4. Detailed example: `examples/gates/GATE_7_RELIABILITY_BUFFER_EXAMPLE.md`
 - Expected logs: `APP: gate=7 buffer_store ...`, `APP: gate=7 buffer_flush_ok ...`, `APP: result=PASS gate=7 ...`
 - Failure modes: buffer never flushes, no recovery after backoff.
 - PASS criteria: payload buffered and flushed after join.
@@ -132,8 +132,8 @@
 - Objective: FUOTA hooks and rollback policy markers.
 - Steps:
   1. Set `CONFIG_APP_GATE=8`, run and capture FUOTA markers.
-  2. Reusable command: `/Users/arif/rak4630-e-ink/examples/gates/run_gate_8_fuota_scaffold.sh /dev/cu.usbmodem1101`
-  3. Detailed example: `/Users/arif/rak4630-e-ink/examples/gates/GATE_8_FUOTA_SCAFFOLD_EXAMPLE.md`
+  2. Reusable command: `examples/gates/run_gate_8_fuota_scaffold.sh /dev/cu.usbmodem1101`
+  3. Detailed example: `examples/gates/GATE_8_FUOTA_SCAFFOLD_EXAMPLE.md`
 - Expected logs: `FUOTA: manifest=...`, `FUOTA: rollback_policy=hard_required`, `APP: result=PASS gate=8 ...`
 - Failure modes: missing FUOTA markers.
 - PASS criteria: all FUOTA markers present + PASS.
