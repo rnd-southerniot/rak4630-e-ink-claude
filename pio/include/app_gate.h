@@ -7,6 +7,7 @@
 #include "app_types.h"
 #include "app_payload.h"
 #include "compat.h"
+#include "gate_framework.h"
 
 typedef enum {
     APP_GATE_0_ENV = 0,
@@ -24,13 +25,8 @@ typedef enum {
 
 typedef struct {
     app_gate_t selected;
-    bool pass;
-    bool halted;
-    uint32_t failures;
+    gate_run_t run;          /* generic gate-runner lifecycle (pass/halted/failures/timing) */
 
-    uint64_t start_ms;
-    uint64_t last_progress_log_ms;
-    uint64_t last_idle_log_ms;
     uint64_t last_sample_ms;
     uint64_t last_uplink_ms;
     uint64_t last_refresh_ms;
