@@ -133,10 +133,16 @@ Keep credentials in `firmware/.env` (gitignored): `DEVEUI`, `APPKEY` (uppercase 
 - `skills/rak4630-gate-troubleshooting/` — Troubleshoot gate failures
 - `skills/rak4630-pio-build/` — Build, flash, monitor workflow
 - `skills/rak4630-pin-reference/` — Quick pin reference card
+- `skills/rak4630-lorawan-provisioning/` — Auto-provision a node via CRM → ChirpStack, validate gates 6/7/9
+- `skills/crm-chirpstack-onboarding/` — CRM product/SOP-template/task setup for provisioning
+- `skills/rak4630-serial-capture/` — Non-interactive serial capture for gate verification
 - `skills/rak3312-gate-troubleshooting/` — Legacy ESP-IDF troubleshooting (archived)
 
 ## Documentation
 
 - Architecture source of truth: `docs/02-data-flow.md`
+- Auto-provisioning workflow: `docs/12-auto-provisioning-workflow.md`
+- CRM product/SOP-template setup: `docs/13-crm-sop-template-and-product-setup.md`
 - Open items tracker: `docs/05-information-needed.md`
+- Tools: `tools/provision-node.sh` (provisioning), `tools/serial_capture.py` (serial capture)
 - Legacy gate scripts: `examples/gates/`
