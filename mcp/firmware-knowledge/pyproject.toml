@@ -1,0 +1,9 @@
+[project]
+name = "mcp-firmware-knowledge"
+version = "0.1.0"
+description = "MCP server serving RAK4630 firmware + LoRaWAN auto-provisioning knowledge"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp[cli]>=1.26.0",
+]
