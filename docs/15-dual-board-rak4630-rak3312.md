@@ -52,6 +52,23 @@ Source: RAKwireless RAK3312 datasheet + `pio/include/board_pins_rak3312.h`.
   (`result=PASS`, `STOP_AFTER_PASS`, ...) are identical on both boards.
 - Serial routes to the ESP32-S3 native USB CDC (`ARDUINO_USB_CDC_ON_BOOT=1`).
 
+## Deploy: continuous live publish
+
+Gate 9 (`live_publish`) stops after one full sensor→display→uplink cycle (`live_publish_ok` /
+`STOP_AFTER_PASS`) — that's the bring-up validation default. For a **deployed node** that keeps
+reading the sensor + battery and uplinking to the gateway indefinitely, set in `platformio.ini`:
+
+```ini
+-DAPP_GATE=9
+-DAPP_GATE9_CONTINUOUS=1     ; never halt; emits live_publish_running, uplink_ok climbs forever
+```
+
+Uplinks are CONFIRMED and spaced by `APP_GATE_UPLINK_PERIOD_MS` (20 s, AS923 duty-cycle safe);
+each is acknowledged (`uplink_ack_ok`). Battery is in the payload (`battery_mv`); on RAK3312 it
+reads the 3.95 V default until the ESP32-S3 VBAT ADC GPIO is wired (`APP_BATTERY_ADC_ENABLED=0`).
+Revert both flags to `0` for bring-up. Validated on RAK3312 (DevEUI `CBAE62F5314DBB79`): join +
+sustained 20 s-cadence confirmed uplinks, no halt.
+
 ## Credentials (per node)
 
 Each physical node has its own DevEUI/AppKey. `inject_credentials.py` prefers

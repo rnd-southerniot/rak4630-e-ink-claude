@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
-# Auto-provision this RAK4630 node through the SIoT CRM onboarding workflow, which
+# Auto-provision a WisBlock node through the SIoT CRM onboarding workflow, which
 # registers the device in ChirpStack (AS923) and yields a DevEUI/AppKey that we
-# write to firmware/.env (consumed by pio/scripts/inject_credentials.py).
+# write to firmware/.env.<board> (consumed by pio/scripts/inject_credentials.py).
 #
 # The CRM backend is expected to already be running and wired to the target
 # ChirpStack (verify with GET /chirpstack/status).
 #
 # Usage:
-#   tools/provision-node.sh
+#   BOARD=rak3312 CRM_PASSWORD='...' tools/provision-node.sh
 # Env overrides:
+#   BOARD      (rak4631 [default] or rak3312 — sets product/serial naming + .env.<board>)
 #   CRM_BASE   (default http://10.10.8.140:4000)
 #   CRM_EMAIL  (default admin@southerneleven.com)
-#   CRM_PASSWORD (default seeded admin pw; override for non-seed instances)
+#   CRM_PASSWORD (required; supply via env)
 #   DEVEUI / APPKEY  (default: randomly generated)
 set -euo pipefail
 
@@ -21,13 +22,21 @@ CRM_EMAIL="${CRM_EMAIL:-admin@southerneleven.com}"
 #   CRM_PASSWORD='...' tools/provision-node.sh
 CRM_PASSWORD="${CRM_PASSWORD:?set CRM_PASSWORD in the environment (do not hardcode)}"
 
-PRODUCT_CODE="LORA-ENV-RAK4630"
-PRODUCT_NAME="RAK4630 Environmental Node"
+# Board selects the product/serial naming and the per-board credentials file.
+#   BOARD=rak4631 (default) → RAK4630 (nRF52840);  BOARD=rak3312 → RAK3312 (ESP32-S3)
+BOARD="${BOARD:-rak4631}"
+case "$BOARD" in
+  rak3312) MODEL="RAK3312"; PRODUCT_CODE="LORA-ENV-RAK3312"
+           PRODUCT_NAME="RAK3312 Environmental Node (ESP32-S3 + SX1262)" ;;
+  rak4631) MODEL="RAK4630"; PRODUCT_CODE="LORA-ENV-RAK4630"
+           PRODUCT_NAME="RAK4630 Environmental Node (nRF52840 + SX1262)" ;;
+  *) echo "error: unknown BOARD '$BOARD' (use rak4631 or rak3312)" >&2; exit 1 ;;
+esac
 LORAWAN_REGION="AS923"
 HARDWARE_NAME="ESP32-WROOM-32"   # reused valid FK; identity carried by serial/DevEUI
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ENV_OUT="$REPO_ROOT/firmware/.env"
+ENV_OUT="$REPO_ROOT/firmware/.env.$BOARD"   # per-board; inject_credentials prefers this
 
 # --- helpers ---------------------------------------------------------------
 jqget() { python3 -c "import sys,json; d=json.load(sys.stdin); print(${1})" 2>/dev/null; }
@@ -46,7 +55,7 @@ die() { echo "ERROR: $*" >&2; exit 1; }
 DEVEUI="${DEVEUI:-$(printf '%s' "$(openssl rand -hex 8)" | tr 'a-f' 'A-F')}"
 APPKEY="${APPKEY:-$(printf '%s' "$(openssl rand -hex 16)" | tr 'a-f' 'A-F')}"
 JOINEUI="0000000000000000"
-SERIAL="RAK4630-ENV-${DEVEUI: -6}"
+SERIAL="${MODEL}-ENV-${DEVEUI: -6}"
 echo ">> DevEUI=$DEVEUI  AppKey=$APPKEY  serial=$SERIAL"
 
 # --- 1. login --------------------------------------------------------------
@@ -115,11 +124,11 @@ echo ">> verifying device in ChirpStack..."
 sleep 2
 api GET "/chirpstack/device/$(printf '%s' "$DEVEUI" | tr 'A-F' 'a-f')" | python3 -m json.tool
 
-# --- 8. emit firmware/.env -------------------------------------------------
+# --- 8. emit per-board firmware/.env.<board> -------------------------------
 umask 077
 cat > "$ENV_OUT" <<EOF
 # Auto-provisioned via tools/provision-node.sh (CRM onboarding workflow -> ChirpStack AS923)
-# Task: $TASK_ID  Serial: $SERIAL
+# Board: $BOARD ($MODEL)  Task: $TASK_ID  Serial: $SERIAL
 DEVEUI=$DEVEUI
 APPKEY=$APPKEY
 JOINEUI=$JOINEUI
