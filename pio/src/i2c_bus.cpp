@@ -27,8 +27,8 @@ esp_err_t i2c_bus_init(void)
      * this rail is switched by WB_IO2 (P1.02); without it the SGP40/BMP280 are
      * unpowered and never ACK on the I2C bus. The display gate already asserts
      * this pin for the panel, but I2C-only gates must enable it themselves. */
-    pinMode(WB_IO2, OUTPUT);
-    digitalWrite(WB_IO2, HIGH);
+    pinMode(PIN_SENSOR_PWR, OUTPUT);
+    digitalWrite(PIN_SENSOR_PWR, HIGH);
     delay(APP_SENSOR_POWER_SETTLE_MS);
 
     Wire.begin();
@@ -44,8 +44,8 @@ esp_err_t i2c_bus_init(void)
 
     s_initialized = true;
 
-    ESP_LOGI(TAG, "init_ok sda=%d scl=%d freq_hz=%d sensor_pwr=WB_IO2(P1.02) int_pullups=on",
-             PIN_I2C_SDA, PIN_I2C_SCL, APP_I2C_FREQ_HZ);
+    ESP_LOGI(TAG, "init_ok sda=%d scl=%d freq_hz=%d sensor_pwr=%d int_pullups=on",
+             PIN_I2C_SDA, PIN_I2C_SCL, APP_I2C_FREQ_HZ, PIN_SENSOR_PWR);
     return ESP_OK;
 }
 

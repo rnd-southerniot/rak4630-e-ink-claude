@@ -12,7 +12,7 @@
 #include "sensor_registry.h"
 #include "sensor_driver.h"
 #include "i2c_bus.h"
-#include "hal_gpio.h"
+#include "board.h"
 #include "sensirion_gas_index_algorithm.h"
 #include "board_pins.h"
 
@@ -462,12 +462,13 @@ esp_err_t sensor_service_read_bmp280(float *pressure_pa, float *temperature_c)
 float sensor_service_read_battery_v(void)
 {
 #if APP_BATTERY_ADC_ENABLED
-    /* nRF52840 VBAT: averaged 12-bit read at the internal 3.0 V reference via HAL,
-     * then apply the WisBlock divider compensation. (VBAT routes to WB_A0/P0.05.) */
-    uint16_t vbat_raw = hal_adc_read_raw_3v0(PIN_BATTERY_VBAT, 8);
-    float battery_v = ((float)vbat_raw * 3.0f / 4096.0f) * VBAT_DIVIDER_COMP;
-    ESP_LOGI(TAG, "battery_adc raw=%u battery_v=%.3f", (unsigned)vbat_raw, (double)battery_v);
-    return battery_v;
+    /* Battery read is board-specific (ADC reference/calibration + divider) and
+     * lives in the board package. Fall back to the default if unavailable. */
+    float v = board_read_battery_volts();
+    if (v < 0.0f) {
+        return (float)APP_BATTERY_DEFAULT_MV / 1000.0f;
+    }
+    return v;
 #else
     return (float)APP_BATTERY_DEFAULT_MV / 1000.0f;
 #endif

@@ -24,9 +24,7 @@ void hal_gpio_mode(int pin, hal_gpio_mode_t mode);
 void hal_gpio_write(int pin, bool high);
 bool hal_gpio_read(int pin);
 
-/* Averaged ADC read at 12-bit resolution with the internal 3.0 V reference
- * (restores the default reference afterwards). Returns raw counts [0..4095]. */
-uint16_t hal_adc_read_raw_3v0(int pin, int samples);
+/* (Battery ADC is board-specific — see board_read_battery_volts() in board.h.) */
 
 #ifdef __cplusplus
 }
