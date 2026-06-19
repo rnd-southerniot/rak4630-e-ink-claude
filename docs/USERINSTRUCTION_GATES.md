@@ -2,12 +2,11 @@
 
 ## Prompt-Driven CLI Workflow
 
-1. Select gate ID scheme (`new` recommended).
-2. Set gate ID.
-3. Apply gate-specific prompts (`1|2|3` device mode for Gate 2.1/3/4/9; OTAA creds for Gate 6/7/9).
-4. Build, flash, monitor.
-5. Confirm PASS and stop.
-6. Update log/checklist before moving to next gate.
+1. Set the gate via `-DAPP_GATE=N` in `pio/platformio.ini` (`N` in `0..9`, or `21` for Gate 2.1).
+2. Apply gate-specific prompts (`1|2|3` device mode for Gate 2.1/3/4/9 via `-DAPP_GATE*_EXPECTED_DEVICES`; OTAA creds for Gate 6/7/9 in `firmware/.env`).
+3. Build, flash, monitor (PlatformIO, from `pio/`, monitor baud `115200`).
+4. Confirm PASS and stop.
+5. Update log/checklist before moving to next gate.
 
 Reusable scripts:
 
@@ -93,32 +92,28 @@ examples/gates/run_gate_9_live_publish.sh /dev/cu.usbmodem1101 1
 
 ## VSCode IDE Workflow
 
-Use tasks in `.vscode/tasks.json`:
+Use the PlatformIO IDE extension for VSCode. The PlatformIO toolbar / project tasks provide:
 
-- `Gate: Set New ID`
-- `Gate: Set Legacy ID`
-- `Gate: Build`
-- `Gate: Flash+Monitor`
-- `Gate: Run Gate 1 Heartbeat`
-- `Gate: Run Gate 2 Display Smoke`
-- `Gate: Run Gate 2.1 I2C Smoke`
+- `Build` (`pio run`)
+- `Upload` (`pio run -t upload`)
+- `Monitor` (`pio device monitor`, baud `115200`)
+- `Upload and Monitor` (`pio run -t upload -t monitor`)
+- `Clean` (`pio run -t clean`)
 
-Use launch profile in `.vscode/launch.json`:
+Gate selection is done by editing `-DAPP_GATE=N` in `pio/platformio.ini`, then rebuilding.
 
-- `ESP-IDF Monitor (Gate Tags)`
-
-This monitor applies tag filtering for `APP`, `DISPLAY`, `SENSOR`, `LORAWAN`, `FUOTA`, `I2C`.
+The serial monitor surfaces tag-prefixed lines for `APP`, `DISPLAY`, `SENSOR`, `LORAWAN`, `FUOTA`, `I2C`.
 
 ## Prompt Rules by Gate
 
 - Gate 1: heartbeat-only gate, no sensor prompt.
-  - Verify pin mapping first (`GPIO46` primary).
-  - Expected markers include `APP: heartbeat_started gpio=46` and `APP: result=PASS gate=1 ...`.
+  - Verify pin mapping first (`P1.03` Green LED primary).
+  - Expected markers include `APP: heartbeat_started pin=P1.03` and `APP: result=PASS gate=1 ...`.
 - Gate 2: display-only smoke test, no sensor prompt.
-  - Use validated tri-color baseline: `CONFIG_APP_DISPLAY_XRAM_OFFSET=0`, `CONFIG_APP_DISPLAY_PWR_INPUT_PULLUP=y`.
+  - Display SPI pins (IO slot): MOSI=P0.30, SCK=P0.03, CS=P0.26, DC=P0.17, BUSY=P0.04, PWR=P1.02.
   - Expected markers include `DISPLAY: spi_bus_check spi_ok=1 ...` and `DISPLAY: hello_world_render_ok`.
-- Gate 2.1: I2C-only smoke gate. Ask connected I2C devices (`1|2|3`) and set `CONFIG_APP_GATE2P1_EXPECTED_DEVICES`.
-- Gate 3: ask connected I2C devices (`1|2|3`).
-- Gate 4: ask selected sensor mode (`1|2|3`).
-- Gate 6/7/9: always ask for `DEVEUI` and `APPKEY` in `firmware/.env`, keep `JOINEUI=0000000000000000` default.
-- After Gate 8 PASS: ask Gate 9 mode (`1|2|3`) and set `CONFIG_APP_GATE9_EXPECTED_DEVICES`.
+- Gate 2.1: I2C-only smoke gate (SDA=P0.13, SCL=P0.14). Ask connected I2C devices (`1|2|3`) and set `-DAPP_GATE2P1_EXPECTED_DEVICES`.
+- Gate 3: ask connected I2C devices (`1|2|3`); set `-DAPP_GATE3_EXPECTED_DEVICES`.
+- Gate 4: ask selected sensor mode (`1|2|3`); set `-DAPP_GATE4_EXPECTED_DEVICES`.
+- Gate 6/7/9: always ask for `DEVEUI` and `APPKEY` in `firmware/.env`, keep `JOINEUI=0000000000000000` default. Real SX126x-Arduino OTAA, AS923-1, ChirpStack v4, CONFIRMED uplinks.
+- After Gate 8 PASS: ask Gate 9 mode (`1|2|3`) and set `-DAPP_GATE9_EXPECTED_DEVICES`.

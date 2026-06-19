@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
+# Select the active gate (and per-gate expected-device counts) for the RAK4630
+# PlatformIO build by rewriting the -D build flags in pio/platformio.ini.
+#
+# Usage:
+#   set_gate_new.sh <gate:0..9|2.1|21> \
+#       [--gate2p1-devices 1|2|3] [--gate3-devices 1|2|3] \
+#       [--gate4-devices 1|2|3]   [--gate9-devices 1|2|3]
+#
+# Device modes: 1 = SGP40 only, 2 = BMP280 only, 3 = both.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -22,50 +31,43 @@ if ! [[ "$GATE" =~ ^[0-9]+$ ]] || { [[ "$GATE" -gt 9 ]] && [[ "$GATE" -ne 21 ]];
   exit 1
 fi
 
-SDK="$REPO_ROOT/firmware/sdkconfig"
+INI="$REPO_ROOT/pio/platformio.ini"
 
-set_value() {
+if [[ ! -f "$INI" ]]; then
+  echo "error: $INI not found" >&2
+  exit 1
+fi
+
+# Rewrite an existing "    -D<KEY>=<value>" build flag in place, preserving indentation.
+set_flag() {
   local key="$1"
   local value="$2"
-  if rg -q "^${key}=" "$SDK"; then
-    perl -pi -e "s/^${key}=.*/${key}=${value}/" "$SDK"
+  if grep -qE "^[[:space:]]*-D${key}=" "$INI"; then
+    perl -pi -e "s/^(\s*)-D${key}=.*/\${1}-D${key}=${value}/" "$INI"
   else
-    echo "${key}=${value}" >> "$SDK"
+    echo "warning: -D${key} not present in platformio.ini (skipped)" >&2
   fi
 }
 
-set_value CONFIG_APP_GATE "$GATE"
-
-# force canonical scheme
-if rg -q '^# CONFIG_APP_GATE_ID_SCHEME_NEW is not set$' "$SDK"; then
-  perl -pi -e 's/^# CONFIG_APP_GATE_ID_SCHEME_NEW is not set$/CONFIG_APP_GATE_ID_SCHEME_NEW=y/' "$SDK"
-elif ! rg -q '^CONFIG_APP_GATE_ID_SCHEME_NEW=y$' "$SDK"; then
-  echo 'CONFIG_APP_GATE_ID_SCHEME_NEW=y' >> "$SDK"
-fi
-
-if rg -q '^CONFIG_APP_GATE_ID_SCHEME_LEGACY=y$' "$SDK"; then
-  perl -pi -e 's/^CONFIG_APP_GATE_ID_SCHEME_LEGACY=y/# CONFIG_APP_GATE_ID_SCHEME_LEGACY is not set/' "$SDK"
-elif ! rg -q '^# CONFIG_APP_GATE_ID_SCHEME_LEGACY is not set$' "$SDK"; then
-  echo '# CONFIG_APP_GATE_ID_SCHEME_LEGACY is not set' >> "$SDK"
-fi
+set_flag APP_GATE "$GATE"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --gate2p1-devices)
-      set_value CONFIG_APP_GATE2P1_EXPECTED_DEVICES "$2"; shift 2 ;;
+      set_flag APP_GATE2P1_EXPECTED_DEVICES "$2"; shift 2 ;;
     --gate3-devices)
-      set_value CONFIG_APP_GATE3_EXPECTED_DEVICES "$2"; shift 2 ;;
+      set_flag APP_GATE3_EXPECTED_DEVICES "$2"; shift 2 ;;
     --gate4-devices)
-      set_value CONFIG_APP_GATE4_EXPECTED_DEVICES "$2"; shift 2 ;;
+      set_flag APP_GATE4_EXPECTED_DEVICES "$2"; shift 2 ;;
     --gate9-devices)
-      set_value CONFIG_APP_GATE9_EXPECTED_DEVICES "$2"; shift 2 ;;
+      set_flag APP_GATE9_EXPECTED_DEVICES "$2"; shift 2 ;;
     *)
       echo "unknown arg: $1"; exit 1 ;;
   esac
 done
 
 if [[ "$GATE" -eq 21 ]]; then
-  echo "set canonical gate=21 (alias gate=2.1)"
+  echo "set APP_GATE=21 (alias gate 2.1) in platformio.ini"
 else
-  echo "set canonical gate=${GATE}"
+  echo "set APP_GATE=${GATE} in platformio.ini"
 fi

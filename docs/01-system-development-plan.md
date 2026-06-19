@@ -1,4 +1,6 @@
-# System Development Plan (ESP-IDF + RAK3312 + RAK19007 + RAK14000)
+# System Development Plan (Arduino/PlatformIO + RAK4630 / nRF52840 + RAK19007 + RAK14000)
+
+> Note: The original ESP-IDF / RAK3312 (ESP32-S3) version of this plan is legacy and superseded. The firmware was ported to Arduino/PlatformIO targeting the RAK4630 (nRF52840) in Feb 2026; the ESP-IDF tree in `firmware/` is retained for reference only. The gate model and milestone plan below are preserved 1:1.
 
 ## 1) Objective
 
@@ -10,8 +12,8 @@ Build an embedded node that:
 
 ## 2) Locked Design Decisions
 
-- Framework: `ESP-IDF` in VSCode extension
-- Core module: `RAK3312` (ESP32-S3 + SX1262)
+- Framework: `Arduino` via `PlatformIO` (PlatformIO IDE / VSCode extension)
+- Core module: `RAK4630` (nRF52840 + SX1262)
 - Base board: `RAK19007`
 - Display: `RAK14000`
 - VOC sensor: `RAK12047` (`SGP40`)
@@ -30,14 +32,14 @@ Build an embedded node that:
 
 ## 3) Recommended Physical Mapping
 
-- Core socket: `RAK3312`
+- Core socket: `RAK4630`
 - IO slot: `RAK14000`
 - Slot A: `RAK12047`
 - 4-pin I2C header: external `BMP280`
 
 Rationale:
 - `RAK14000` needs the IO slot.
-- LoRa is already integrated in `RAK3312`, avoiding IO-slot contention.
+- LoRa is already integrated in `RAK4630`, avoiding IO-slot contention.
 
 ## 4) Canonical Gate Model
 
@@ -46,7 +48,7 @@ Bring-up and production validation follow stop-after-pass gates:
 - Gate `0`: `env`
 - Gate `1`: `heartbeat`
 - Gate `2`: `display_smoke` (RAK14000, SPI)
-- Gate `2.1`: `i2c_smoke` (internal selector `CONFIG_APP_GATE=21`)
+- Gate `2.1`: `i2c_smoke` (internal selector `-DAPP_GATE=21`)
 - Gate `3`: `i2c_presence`
 - Gate `4`: `sensor_pipeline`
 - Gate `5`: `payload_v1`
@@ -59,14 +61,14 @@ Bring-up and production validation follow stop-after-pass gates:
 
 ## M0 - Hardware and Region Lock (Completed)
 
-- Confirm ESP-IDF hardware path
+- Confirm RAK4630 (nRF52840) hardware path
 - Confirm sensor choices (`SGP40` + external `BMP280`)
 - Confirm LoRa region (`AS923-1`) and ChirpStack major version (v4)
 
 ## M1 - Project Skeleton and Build Baseline
 
-- Create firmware structure (`firmware/main`, `firmware/components`, `firmware/tools`)
-- Configure VSCode ESP-IDF extension and tasks
+- Create firmware structure (`pio/src`, `pio/include`, `pio/scripts`)
+- Configure PlatformIO IDE / VSCode extension and project tasks
 - Add boot banner with firmware version, git hash, board profile
 
 Exit criteria:
@@ -139,14 +141,14 @@ Exit criteria:
 Exit criteria:
 - Successful pilot update and verified rollback path
 
-## 6) VSCode Execution Model (ESP-IDF)
+## 6) VSCode Execution Model (PlatformIO)
 
-- Install `Espressif IDF` extension
-- Set target: `esp32s3`
-- Standard flow:
-  - `idf.py set-target esp32s3`
-  - `idf.py build`
-  - `idf.py -p <port> flash monitor`
+- Install the `PlatformIO IDE` extension for VSCode
+- Target board/variant: RAK4630 (nRF52840), `WisCore_RAK4631_Board`; one-time board/variant install is described in the `pio/platformio.ini` header
+- Standard flow (from the `pio/` directory):
+  - `~/.platformio/penv/bin/pio run` (build)
+  - `~/.platformio/penv/bin/pio run -t upload -t monitor` (flash + monitor, baud `115200`)
+  - `~/.platformio/penv/bin/pio run -t clean && ~/.platformio/penv/bin/pio run` (clean build)
 
 ## 7) Risks and Mitigations
 
@@ -157,7 +159,7 @@ Exit criteria:
 
 ## 8) Deliverables
 
-- ESP-IDF firmware source tree
+- Arduino/PlatformIO firmware source tree (`pio/`)
 - Wiring and slot map
 - Bring-up and commissioning checklist
 - ChirpStack v4 integration notes
