@@ -4,10 +4,11 @@
  * The nRF52 Arduino BSP does have FreeRTOS, but keeping it simple.
  */
 
-#include <Arduino.h>
+#include <Arduino.h>  /* millis() */
 
 #include "heartbeat.h"
 #include "board_pins.h"
+#include "hal_gpio.h"
 
 static const char *TAG = "APP";
 static volatile uint32_t s_toggle_count = 0;
@@ -22,8 +23,8 @@ esp_err_t heartbeat_start(void)
         return ESP_OK;
     }
 
-    pinMode(PIN_HEARTBEAT_LED, OUTPUT);
-    digitalWrite(PIN_HEARTBEAT_LED, LOW);
+    hal_gpio_mode(PIN_HEARTBEAT_LED, HAL_GPIO_OUTPUT);
+    hal_gpio_write(PIN_HEARTBEAT_LED, false);
     s_toggle_count = 0;
     s_running = true;
     s_last_toggle_ms = millis();
@@ -39,7 +40,7 @@ void heartbeat_update(void)
     uint32_t now = millis();
     if (now - s_last_toggle_ms >= 500) {
         s_level = !s_level;
-        digitalWrite(PIN_HEARTBEAT_LED, s_level ? HIGH : LOW);
+        hal_gpio_write(PIN_HEARTBEAT_LED, s_level);
         s_toggle_count++;
         s_last_toggle_ms = now;
     }

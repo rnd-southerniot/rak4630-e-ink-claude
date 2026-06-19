@@ -3,12 +3,13 @@
  * Replaces ESP-IDF SPI driver. Same display logic and command sequence.
  */
 
-#include <Arduino.h>
-#include <SPI.h>
+#include <Arduino.h>  /* delay() */
 #include <string.h>
 
 #include "display_epd_ssd1680.h"
 #include "board_pins.h"
+#include "hal_gpio.h"
+#include "hal_spi.h"
 
 static const char *TAG = "DISPLAY";
 
@@ -48,8 +49,8 @@ static epd_state_t s_epd;
 
 static bool epd_busy_active(void)
 {
-    int level = digitalRead(s_epd.cfg.pin_busy);
-    return s_epd.cfg.busy_active_high ? (level == HIGH) : (level == LOW);
+    bool high = hal_gpio_read(s_epd.cfg.pin_busy);
+    return s_epd.cfg.busy_active_high ? high : !high;
 }
 
 static int epd_row_bytes(void)
@@ -68,13 +69,13 @@ static esp_err_t epd_spi_tx(const uint8_t *data, size_t len)
 {
     if (data == NULL || len == 0) return ESP_ERR_INVALID_ARG;
 
-    SPI.beginTransaction(SPISettings(s_epd.cfg.spi_mhz * 1000000, MSBFIRST, SPI_MODE0));
-    digitalWrite(s_epd.cfg.pin_cs, LOW);
+    hal_spi_begin_transaction((uint32_t)s_epd.cfg.spi_mhz * 1000000u);
+    hal_gpio_write(s_epd.cfg.pin_cs, false);
     for (size_t i = 0; i < len; i++) {
-        SPI.transfer(data[i]);
+        hal_spi_transfer(data[i]);
     }
-    digitalWrite(s_epd.cfg.pin_cs, HIGH);
-    SPI.endTransaction();
+    hal_gpio_write(s_epd.cfg.pin_cs, true);
+    hal_spi_end_transaction();
 
     s_epd.spi_tx_calls++;
     s_epd.spi_tx_bytes += (uint32_t)len;
@@ -84,14 +85,14 @@ static esp_err_t epd_spi_tx(const uint8_t *data, size_t len)
 static esp_err_t epd_send_cmd(uint8_t cmd)
 {
     if (s_epd.cfg.pin_dc < 0) return ESP_ERR_INVALID_STATE;
-    digitalWrite(s_epd.cfg.pin_dc, LOW);
+    hal_gpio_write(s_epd.cfg.pin_dc, false);
     return epd_spi_tx(&cmd, 1);
 }
 
 static esp_err_t epd_send_data(const uint8_t *data, size_t len)
 {
     if (s_epd.cfg.pin_dc < 0) return ESP_ERR_INVALID_STATE;
-    digitalWrite(s_epd.cfg.pin_dc, HIGH);
+    hal_gpio_write(s_epd.cfg.pin_dc, true);
     return epd_spi_tx(data, len);
 }
 
@@ -124,9 +125,9 @@ static esp_err_t epd_wait_idle(uint32_t timeout_ms, bool *saw_busy_active)
 static void epd_reset(void)
 {
     if (s_epd.cfg.pin_rst < 0) return;
-    digitalWrite(s_epd.cfg.pin_rst, LOW);
+    hal_gpio_write(s_epd.cfg.pin_rst, false);
     delay(10);
-    digitalWrite(s_epd.cfg.pin_rst, HIGH);
+    hal_gpio_write(s_epd.cfg.pin_rst, true);
     delay(10);
 }
 
@@ -170,35 +171,35 @@ esp_err_t display_epd_ssd1680_init(const display_epd_ssd1680_config_t *cfg)
     s_epd.cfg = *cfg;
 
     /* Configure GPIO pins */
-    pinMode(cfg->pin_dc, OUTPUT);
-    pinMode(cfg->pin_cs, OUTPUT);
-    digitalWrite(cfg->pin_cs, HIGH);
+    hal_gpio_mode(cfg->pin_dc, HAL_GPIO_OUTPUT);
+    hal_gpio_mode(cfg->pin_cs, HAL_GPIO_OUTPUT);
+    hal_gpio_write(cfg->pin_cs, true);
 
     if (cfg->pin_rst >= 0) {
-        pinMode(cfg->pin_rst, OUTPUT);
-        digitalWrite(cfg->pin_rst, HIGH);
+        hal_gpio_mode(cfg->pin_rst, HAL_GPIO_OUTPUT);
+        hal_gpio_write(cfg->pin_rst, true);
     }
 
     /* BUSY pin — input with pull-up */
-    pinMode(cfg->pin_busy, INPUT_PULLUP);
+    hal_gpio_mode(cfg->pin_busy, HAL_GPIO_INPUT_PULLUP);
 
     /* Power enable pin */
     if (cfg->pwr_input_pullup) {
-        pinMode(cfg->pin_pwr, INPUT_PULLUP);
+        hal_gpio_mode(cfg->pin_pwr, HAL_GPIO_INPUT_PULLUP);
     } else {
-        pinMode(cfg->pin_pwr, OUTPUT);
-        digitalWrite(cfg->pin_pwr, cfg->pwr_active_high ? HIGH : LOW);
+        hal_gpio_mode(cfg->pin_pwr, HAL_GPIO_OUTPUT);
+        hal_gpio_write(cfg->pin_pwr, cfg->pwr_active_high != 0);
     }
 
-    digitalWrite(cfg->pin_dc, HIGH);
+    hal_gpio_write(cfg->pin_dc, true);
     delay(10);
 
     ESP_LOGI(TAG, "busy_cfg pin=%d active_high=%d level=%d pwr_active_high=%d pwr_input_pullup=%d pwr_level=%d",
-             cfg->pin_busy, cfg->busy_active_high, digitalRead(cfg->pin_busy),
-             cfg->pwr_active_high, cfg->pwr_input_pullup, digitalRead(cfg->pin_pwr));
+             cfg->pin_busy, cfg->busy_active_high, (int)hal_gpio_read(cfg->pin_busy),
+             cfg->pwr_active_high, cfg->pwr_input_pullup, (int)hal_gpio_read(cfg->pin_pwr));
 
     /* Initialize SPI */
-    SPI.begin();
+    hal_spi_begin();
 
     /* Hardware reset */
     epd_reset();
@@ -296,7 +297,7 @@ void display_epd_ssd1680_get_diag(display_epd_ssd1680_diag_t *diag)
 
     diag->reset_busy_pulse_seen = s_epd.reset_busy_pulse_seen;
     diag->refresh_busy_pulse_seen = s_epd.refresh_busy_pulse_seen;
-    diag->busy_level_snapshot = digitalRead(s_epd.cfg.pin_busy);
+    diag->busy_level_snapshot = (int)hal_gpio_read(s_epd.cfg.pin_busy);
     diag->spi_tx_calls = s_epd.spi_tx_calls;
     diag->spi_tx_bytes = s_epd.spi_tx_bytes;
 }

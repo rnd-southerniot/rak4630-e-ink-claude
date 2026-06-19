@@ -65,6 +65,19 @@ BME280 (devices=2, no SHTC3 module) to confirm no regression:
 SHTC3 (0x70) probed absent → no effect; its read/humidity path is code-only pending a module.
 Host tests: `PASS payload_encode_v1`, `PASS payload_encode_v2`, `PASS gate_id_legacy_map`.
 
+### HAL layer re-validation (2026-06-19)
+
+After introducing the GPIO/SPI/ADC HAL (`hal_gpio.*`, `hal_spi.*`) and migrating heartbeat,
+main, sensor battery, and the SSD1680 display onto it, re-ran the HAL-touched gates (BME280):
+
+- Gate 1 (gpio): `heartbeat_started gpio=35`; `result=PASS gate=1 heartbeat_ok toggles=6`.
+- Gate 2 (spi+gpio): `spi_bus_check spi_ok=1 reset_busy_seen=1`; tri-color refresh pulses;
+  `hello_world_render_ok`; `result=PASS gate=2 display_smoke_ok spi_check=1`.
+- Gate 9 (adc+spi+full path): `battery_adc raw=3272 battery_v=4.146` (HAL ADC on WB_A0);
+  `join_success`; `render_data … batt=4.15`; `uplink_ack_ok`.
+
+No regression — services/gates now route hardware access through the HAL. Host tests green.
+
 ## Legacy ESP-IDF / RAK3312 Evidence (SUPERSEDED)
 
 ## Fresh Rerun Requirement

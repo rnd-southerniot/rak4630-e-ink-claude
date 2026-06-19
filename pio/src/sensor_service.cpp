@@ -12,6 +12,7 @@
 #include "sensor_registry.h"
 #include "sensor_driver.h"
 #include "i2c_bus.h"
+#include "hal_gpio.h"
 #include "sensirion_gas_index_algorithm.h"
 #include "board_pins.h"
 
@@ -461,26 +462,11 @@ esp_err_t sensor_service_read_bmp280(float *pressure_pa, float *temperature_c)
 float sensor_service_read_battery_v(void)
 {
 #if APP_BATTERY_ADC_ENABLED
-    /*
-     * nRF52840 battery voltage measurement:
-     * Use analogRead on VBAT pin with internal reference.
-     * The nRF52 BSP provides readVBAT() or we use direct analogRead.
-     */
-    analogReference(AR_INTERNAL_3_0);  /* 3.0V internal reference */
-    analogReadResolution(12);           /* 12-bit resolution */
-
-    uint32_t vbat_raw = 0;
-    for (int i = 0; i < 8; i++) {
-        vbat_raw += analogRead(PIN_BATTERY_VBAT);
-    }
-    vbat_raw /= 8;
-
-    /* Convert: raw * 3.0V / 4096 * VBAT_DIVIDER_COMP */
+    /* nRF52840 VBAT: averaged 12-bit read at the internal 3.0 V reference via HAL,
+     * then apply the WisBlock divider compensation. (VBAT routes to WB_A0/P0.05.) */
+    uint16_t vbat_raw = hal_adc_read_raw_3v0(PIN_BATTERY_VBAT, 8);
     float battery_v = ((float)vbat_raw * 3.0f / 4096.0f) * VBAT_DIVIDER_COMP;
-    ESP_LOGI(TAG, "battery_adc raw=%lu battery_v=%.3f", (unsigned long)vbat_raw, (double)battery_v);
-
-    /* Restore default reference for other analog reads */
-    analogReference(AR_DEFAULT);
+    ESP_LOGI(TAG, "battery_adc raw=%u battery_v=%.3f", (unsigned)vbat_raw, (double)battery_v);
     return battery_v;
 #else
     return (float)APP_BATTERY_DEFAULT_MV / 1000.0f;
