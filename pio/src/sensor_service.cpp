@@ -9,6 +9,8 @@
 #include <string.h>
 
 #include "sensor_service.h"
+#include "sensor_registry.h"
+#include "sensor_driver.h"
 #include "i2c_bus.h"
 #include "sensirion_gas_index_algorithm.h"
 #include "board_pins.h"
@@ -17,6 +19,44 @@ static const char *TAG = "SENSOR";
 
 static bool s_sgp40_present;
 static bool s_bmp280_present;
+static bool s_shtc3_present;
+
+/* SHTC3 (RAK1901) driver lives in drivers/shtc3.cpp. */
+extern sensor_driver_t *shtc3_driver(void);
+
+/* Registry adapters wrapping the validated SGP40/BMP280 read paths so all
+ * sensors are enumerable through one interface (and new sensors plug in the
+ * same way). VOC/BMP read logic is unchanged; these just shape it into a sample. */
+static esp_err_t sgp40_drv_read(sensor_sample_t *s)
+{
+    float voc = 0.0f;
+    esp_err_t err = sensor_service_read_voc_only(&voc);
+    if (err != ESP_OK) return err;
+    s->voc_index = voc;
+    s->present_mask |= SENSOR_FIELD_VOC;
+    return ESP_OK;
+}
+
+static esp_err_t bmp280_drv_read(sensor_sample_t *s)
+{
+    float p = 0.0f, t = 0.0f;
+    esp_err_t err = sensor_service_read_bmp280(&p, &t);
+    if (err != ESP_OK) return err;
+    s->pressure_pa = p;
+    s->temperature_c = t;
+    s->present_mask |= SENSOR_FIELD_PRESSURE | SENSOR_FIELD_TEMP;
+    return ESP_OK;
+}
+
+/* init=NULL: SGP40 VOC algo + BMP280 calibration are set up in sensor_service_init. */
+static sensor_driver_t s_sgp40_drv = {
+    "SGP40", (uint8_t)APP_SGP40_ADDR, SENSOR_FIELD_VOC,
+    NULL, NULL, sgp40_drv_read, false,
+};
+static sensor_driver_t s_bmp280_drv = {
+    "BMP280", (uint8_t)APP_BMP280_ADDR, SENSOR_FIELD_PRESSURE | SENSOR_FIELD_TEMP,
+    NULL, NULL, bmp280_drv_read, false,
+};
 
 /* --- BMP280 calibration data (Bosch datasheet section 3.11.3) --- */
 typedef struct {
@@ -261,11 +301,37 @@ esp_err_t sensor_service_init(void)
     ESP_LOGI(TAG, "battery_adc_init_ok method=nrf52_vbat");
 #endif
 
+    /* Build the pluggable sensor registry. Adding a sensor in a WisBlock slot =
+     * implement a sensor_driver_t + register it here (slots share the I2C bus). */
+    sensor_registry_reset();
+    sensor_registry_add(&s_sgp40_drv);
+    sensor_registry_add(&s_bmp280_drv);
+    sensor_registry_add(shtc3_driver());
+    sensor_registry_probe_all();
+    sensor_driver_t *shtc3 = sensor_registry_find("SHTC3");
+    s_shtc3_present = (shtc3 != NULL) && shtc3->present;
+    ESP_LOGI(TAG, "registry_ready drivers=%u present=%u shtc3=%d",
+             (unsigned)sensor_registry_count(), (unsigned)sensor_registry_present_count(),
+             s_shtc3_present);
+
     return ESP_OK;
 }
 
 bool sensor_service_is_sgp40_present(void) { return s_sgp40_present; }
 bool sensor_service_is_bmp280_present(void) { return s_bmp280_present; }
+bool sensor_service_is_shtc3_present(void) { return s_shtc3_present; }
+
+esp_err_t sensor_service_read_humidity(float *humidity_rh)
+{
+    if (humidity_rh == NULL) return ESP_ERR_INVALID_ARG;
+    if (!s_shtc3_present) return ESP_ERR_NOT_FOUND;
+    sensor_sample_t tmp;
+    memset(&tmp, 0, sizeof(tmp));
+    esp_err_t err = shtc3_driver()->read(&tmp);
+    if (err != ESP_OK) return err;
+    *humidity_rh = tmp.humidity_rh;
+    return ESP_OK;
+}
 
 esp_err_t sensor_service_read_identity(sensor_identity_t *identity)
 {
@@ -442,6 +508,17 @@ esp_err_t sensor_service_read(sensor_sample_t *sample)
     sample->temperature_c = temperature_c;
     sample->battery_v = battery_v;
     sample->timestamp_ms = (uint64_t)millis();
+    sample->present_mask = SENSOR_FIELD_VOC | SENSOR_FIELD_PRESSURE |
+                           SENSOR_FIELD_TEMP | SENSOR_FIELD_BATTERY;
+
+    if (s_shtc3_present) {
+        float rh = 0.0f;
+        if (sensor_service_read_humidity(&rh) == ESP_OK) {
+            sample->humidity_rh = rh;
+            sample->present_mask |= SENSOR_FIELD_HUMIDITY;
+        }
+    }
+
     sample->valid = (voc >= 1.0f && pressure_pa >= 80000.0f && pressure_pa <= 120000.0f &&
                      temperature_c >= -40.0f && temperature_c <= 85.0f);
 

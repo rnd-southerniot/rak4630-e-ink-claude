@@ -387,8 +387,9 @@ esp_err_t display_service_render(const sensor_sample_t *sample)
     framebuffer_draw_text_scaled(6, line_y0 + (line_step * 3), line4, PIXEL_RED, data_scale);
 
     ESP_RETURN_ON_ERROR(display_flush(), TAG, "render_flush_failed");
-    ESP_LOGI(TAG, "render_data voc=%.2f pressure=%.1f temp=%.2f batt=%.2f",
+    ESP_LOGI(TAG, "render_data voc=%.2f pressure=%.1f temp=%.2f humidity=%.1f batt=%.2f",
              (double)sample->voc_index, (double)sample->pressure_pa,
-             (double)sample->temperature_c, (double)sample->battery_v);
+             (double)sample->temperature_c, (double)sample->humidity_rh,
+             (double)sample->battery_v);
     return ESP_OK;
 }
