@@ -182,51 +182,39 @@ static const char *app_gate_log_id(app_gate_t gate)
     }
 }
 
+/* Thin wrappers binding the generic gate_framework helpers to this app's gate
+ * catalog (id/name). The canonical markers live in gate_framework.c. */
 static void gate_log_progress(app_gate_ctx_t *ctx, uint64_t now_ms, const char *fmt, ...)
 {
-    if (now_ms - ctx->last_progress_log_ms < APP_GATE_PROGRESS_LOG_MS) return;
-
     char line[192] = {0};
     va_list args;
     va_start(args, fmt);
     vsnprintf(line, sizeof(line), fmt, args);
     va_end(args);
-
-    ESP_LOGI(TAG, "gate=%s name=%s %s", app_gate_log_id(ctx->selected), app_gate_name(ctx->selected), line);
-    ctx->last_progress_log_ms = now_ms;
+    gate_fw_progress(&ctx->run, now_ms, app_gate_log_id(ctx->selected),
+                     app_gate_name(ctx->selected), "%s", line);
 }
 
 static void gate_mark_pass(app_gate_ctx_t *ctx, const char *fmt, ...)
 {
-    if (ctx->halted) return;
-
     char line[192] = {0};
     va_list args;
     va_start(args, fmt);
     vsnprintf(line, sizeof(line), fmt, args);
     va_end(args);
-
-    ctx->pass = true;
-    ctx->halted = true;
-    ESP_LOGI(TAG, "result=PASS gate=%s name=%s %s", app_gate_log_id(ctx->selected), app_gate_name(ctx->selected), line);
-    ESP_LOGI(TAG, "handshake=STOP_AFTER_PASS gate=%s action=change_APP_GATE_and_reflash", app_gate_log_id(ctx->selected));
+    gate_fw_mark_pass(&ctx->run, app_gate_log_id(ctx->selected),
+                      app_gate_name(ctx->selected), "%s", line);
 }
 
 static void gate_log_fail(app_gate_ctx_t *ctx, uint64_t now_ms, const char *fmt, ...)
 {
-    if (now_ms - ctx->last_progress_log_ms < APP_GATE_PROGRESS_LOG_MS) return;
-
     char line[192] = {0};
     va_list args;
     va_start(args, fmt);
     vsnprintf(line, sizeof(line), fmt, args);
     va_end(args);
-
-    ctx->failures++;
-    ESP_LOGW(TAG, "result=FAIL gate=%s name=%s failures=%lu %s",
-             app_gate_log_id(ctx->selected), app_gate_name(ctx->selected),
-             (unsigned long)ctx->failures, line);
-    ctx->last_progress_log_ms = now_ms;
+    gate_fw_mark_fail(&ctx->run, now_ms, app_gate_log_id(ctx->selected),
+                      app_gate_name(ctx->selected), "%s", line);
 }
 
 static void gate_tick_0(app_gate_ctx_t *ctx)
@@ -246,7 +234,7 @@ static void gate_tick_1(app_gate_ctx_t *ctx, uint64_t now_ms)
         return;
     }
 
-    if ((now_ms - ctx->start_ms) >= 3000 && toggles >= 6) {
+    if ((now_ms - ctx->run.start_ms) >= 3000 && toggles >= 6) {
         gate_mark_pass(ctx, "heartbeat_ok toggles=%lu", (unsigned long)toggles);
     }
 }
@@ -530,7 +518,7 @@ static void gate_tick_6(app_gate_ctx_t *ctx, uint64_t now_ms)
 
 static void gate_tick_7(app_gate_ctx_t *ctx, uint64_t now_ms)
 {
-    if (!ctx->backend_enabled && (now_ms - ctx->start_ms) >= (uint64_t)APP_GATE6_BACKEND_ENABLE_DELAY_MS) {
+    if (!ctx->backend_enabled && (now_ms - ctx->run.start_ms) >= (uint64_t)APP_GATE6_BACKEND_ENABLE_DELAY_MS) {
         ESP_ERROR_CHECK(lorawan_service_set_backend_active(true));
         ctx->backend_enabled = true;
     }
@@ -749,21 +737,17 @@ void app_gate_tick(app_gate_ctx_t *ctx, uint64_t now_ms)
 {
     if (ctx == NULL) return;
 
-    if (ctx->start_ms == 0) {
-        ctx->start_ms = now_ms;
-        ctx->last_progress_log_ms = now_ms;
-        ctx->last_idle_log_ms = now_ms;
+    if (ctx->run.start_ms == 0) {
+        ctx->run.start_ms = now_ms;
+        ctx->run.last_progress_log_ms = now_ms;
+        ctx->run.last_idle_log_ms = now_ms;
         ctx->last_sample_ms = now_ms;
         ctx->last_uplink_ms = now_ms;
         ctx->last_refresh_ms = now_ms;
     }
 
-    if (ctx->halted) {
-        if ((now_ms - ctx->last_idle_log_ms) >= ((uint64_t)APP_GATE_IDLE_LOG_SEC * 1000ULL)) {
-            ESP_LOGI(TAG, "gate=%s halted_after_pass=1 next_action=set_APP_GATE_and_reflash",
-                     app_gate_log_id(ctx->selected));
-            ctx->last_idle_log_ms = now_ms;
-        }
+    if (ctx->run.halted) {
+        gate_fw_idle_tick(&ctx->run, now_ms, app_gate_log_id(ctx->selected), APP_GATE_IDLE_LOG_SEC);
         return;
     }
 
@@ -785,5 +769,5 @@ void app_gate_tick(app_gate_ctx_t *ctx, uint64_t now_ms)
 
 bool app_gate_is_halted(const app_gate_ctx_t *ctx)
 {
-    return ctx != NULL && ctx->halted;
+    return ctx != NULL && ctx->run.halted;
 }

@@ -78,6 +78,28 @@ main, sensor battery, and the SSD1680 display onto it, re-ran the HAL-touched ga
 
 No regression — services/gates now route hardware access through the HAL. Host tests green.
 
+### Gate-framework extraction re-validation (2026-06-19)
+
+After extracting the generic gate-runner (`gate_framework.{h,cpp}`, `gate_run_t`) from
+`app_gate.cpp` — markers byte-identical — re-ran ALL 11 gates on hardware (BME280, devices=2):
+
+| Gate | result |
+|------|--------|
+| 0 env | PASS |
+| 1 heartbeat | PASS (toggles=6) |
+| 2 display_smoke | PASS (hello_world, spi_check=1) |
+| 2.1 i2c_smoke | PASS (bmp280=1, expected=2) |
+| 3 i2c_presence | PASS (expected=2) |
+| 4 sensor_pipeline | PASS (identity=1 sensor_ok=3) |
+| 5 payload_v1 | PASS (12 bytes) |
+| 6 lorawan_join_uplink | PASS (joined=1 uplink_done=1) |
+| 7 reliability_buffer | PASS (buffered=1 flushed=1) |
+| 8 fuota_scaffold | PASS (hooks=1 rollback=1) |
+| 9 live_publish | PASS (sensor_ok=6 display_updates=1 uplink_ok=1) |
+
+No regression — `result=PASS/FAIL`, `handshake=STOP_AFTER_PASS`, and `halted_after_pass`
+markers all emitted by the framework unchanged. Host tests green.
+
 ## Legacy ESP-IDF / RAK3312 Evidence (SUPERSEDED)
 
 ## Fresh Rerun Requirement
