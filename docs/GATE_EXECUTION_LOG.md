@@ -52,6 +52,19 @@ Gate selection: `-DAPP_GATE=N` in `pio/platformio.ini` (or
 
 ---
 
+### Sensor-registry refactor re-validation (2026-06-19)
+
+After the pluggable sensor-driver registry + SHTC3 driver + payload v2 refactor, re-ran with
+BME280 (devices=2, no SHTC3 module) to confirm no regression:
+
+- Gate 4: `registry_ready drivers=3 present=1 shtc3=0`; `identity_bmp280 chip_id=0x60 chip_id_ok=1`;
+  `bmp280_data`; `result=PASS gate=4 sensor_ok=3 sensor_fail=0`.
+- Gate 9: `registry_ready drivers=3 present=1`; `join_success`; `render_data … humidity=0.0 batt=4.13`;
+  `uplink_ack_ok`; `result=PASS gate=9 sensor_ok=6 display_updates=1 uplink_ok=1`.
+
+SHTC3 (0x70) probed absent → no effect; its read/humidity path is code-only pending a module.
+Host tests: `PASS payload_encode_v1`, `PASS payload_encode_v2`, `PASS gate_id_legacy_map`.
+
 ## Legacy ESP-IDF / RAK3312 Evidence (SUPERSEDED)
 
 ## Fresh Rerun Requirement
