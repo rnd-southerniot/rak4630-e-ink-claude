@@ -56,10 +56,11 @@ def _load_env(path):
 
 
 def main():
+    rel = os.path.relpath(ENV_PATH, REPO_ROOT)
     values = _load_env(ENV_PATH)
     if not values:
-        print("inject_credentials: firmware/.env not found or empty "
-              "-> using placeholder keys (gates 6/7/9 will not join)")
+        print("inject_credentials: %s not found or empty "
+              "-> using placeholder keys (gates 6/7/9 will not join)" % rel)
         return
 
     flags = []
@@ -79,8 +80,8 @@ def main():
         env.Append(CPPDEFINES=[(macro, env.StringifyMacro(val))])  # noqa: F821
 
     if flags:
-        print("inject_credentials: injected %s from firmware/.env"
-              % ", ".join(m for m, _ in flags))
+        print("inject_credentials: injected %s from %s"
+              % (", ".join(m for m, _ in flags), rel))
 
 
 main()
