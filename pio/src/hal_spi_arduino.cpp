@@ -6,9 +6,15 @@
 
 #include "hal_spi.h"
 
-void hal_spi_begin(void)
+void hal_spi_begin(int sclk, int miso, int mosi)
 {
-    SPI.begin();
+#if defined(ESP_PLATFORM)
+    /* ESP32 SPI is remappable — bind the display pins (CS handled via hal_gpio). */
+    SPI.begin(sclk, miso, mosi, -1);
+#else
+    (void)sclk; (void)miso; (void)mosi;
+    SPI.begin();   /* nRF52: pins fixed by the board variant */
+#endif
 }
 
 void hal_spi_begin_transaction(uint32_t hz)

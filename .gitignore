@@ -14,3 +14,4 @@ pio/.pio/
 
 # Secrets
 firmware/.env
+firmware/.env.*

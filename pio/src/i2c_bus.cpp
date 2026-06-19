@@ -31,16 +31,20 @@ esp_err_t i2c_bus_init(void)
     digitalWrite(PIN_SENSOR_PWR, HIGH);
     delay(APP_SENSOR_POWER_SETTLE_MS);
 
+#if defined(ESP_PLATFORM)
+    /* ESP32 I2C is remappable — bind the bus pins; the core enables internal
+     * pull-ups itself, so we must NOT re-pinMode them (that detaches the bus). */
+    Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
+#else
+    /* nRF52: pins come from the variant. The Adafruit core does NOT enable
+     * internal I2C pull-ups — do it explicitly after Wire.begin() (configures the
+     * TWIM pins). ~13k is weak but adequate at 100 kHz; modules with their own
+     * pull-ups are unaffected. */
     Wire.begin();
-    Wire.setClock(APP_I2C_FREQ_HZ);
-
-    /* The nRF52 (Adafruit) core does NOT enable internal I2C pull-ups, unlike
-     * the ESP32 core. A hand-wired breakout without external pull-ups will leave
-     * SDA/SCL low and no device can ACK. Enable the internal pull-ups after
-     * Wire.begin() (which configures the TWIM pins). ~13k is weak but adequate
-     * for short wiring at 100 kHz. Modules with their own pull-ups are unaffected. */
     pinMode(PIN_I2C_SDA, INPUT_PULLUP);
     pinMode(PIN_I2C_SCL, INPUT_PULLUP);
+#endif
+    Wire.setClock(APP_I2C_FREQ_HZ);
 
     s_initialized = true;
 

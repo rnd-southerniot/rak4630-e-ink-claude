@@ -100,6 +100,32 @@ After extracting the generic gate-runner (`gate_framework.{h,cpp}`, `gate_run_t`
 No regression — `result=PASS/FAIL`, `handshake=STOP_AFTER_PASS`, and `halted_after_pass`
 markers all emitted by the framework unchanged. Host tests green.
 
+## RAK3312 (ESP32-S3) Dual-Board Bring-Up — ALL 11 GATES PASS (2026-06-20)
+
+Second board added in the same repo (`pio run -e rak3312`), sharing ~90% of the code via the
+HAL/registry/gate-framework/board-package seams. Same RAK19007 base (display + BME280) driven by
+the RAK3312 ESP32-S3 core. Gate ladder via `-e rak3312` (BME280, devices=2):
+
+| Gate | result |
+|------|--------|
+| 0 env | PASS |
+| 1 heartbeat | PASS (LED GPIO46) |
+| 2 display_smoke | PASS (SSD1680 on SPI 11/13/12, `spi_check=1`, `hello_world_render_ok`) |
+| 2.1 i2c_smoke | PASS (`init_ok sda=9 scl=40 sensor_pwr=14`; BME280 `0x76`) |
+| 3 i2c_presence | PASS |
+| 4 sensor_pipeline | PASS (`registry_ready drivers=3`; live `bmp280_data`) |
+| 5 payload_v1 | PASS |
+| 6 lorawan_join_uplink | PASS — `radio_init_ok board=rak3312 chip=sx1262 nss=7 sclk=5 mosi=6 miso=3 busy=48 dio1=47 rst=8 antsw=4 tcxo=1`; real `join_success`; `uplink_ack_ok` (**SX1262 worked first try**) |
+| 7 reliability_buffer | PASS (`buffer_store`→`join_success`→`buffer_flush_ok flushed=1`) |
+| 8 fuota_scaffold | PASS |
+| 9 live_publish | PASS (`render_data … batt=3.95`; `uplink_ack_ok`; `sensor_ok≥2 display_updates=1 uplink_ok=1`) |
+
+ESP32-specific code beyond the board package: bind the remappable SPI (`hal_spi_begin(sclk,miso,mosi)`)
+and I2C (`Wire.begin(sda,scl)`) bus pins; `compat.h` uses the real ESP-IDF `esp_err_t`. SX1262
+RF config (GPIO4 ANT_SW as RXEN + TCXO) was correct on the first attempt. Battery ADC disabled
+(`APP_BATTERY_ADC_ENABLED=0`, 3.95 V default) — ESP32-S3 VBAT GPIO to wire later. Host tests green;
+`-e rak4631` unchanged (no regression).
+
 ## Legacy ESP-IDF / RAK3312 Evidence (SUPERSEDED)
 
 ## Fresh Rerun Requirement
