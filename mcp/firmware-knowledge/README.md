@@ -9,15 +9,25 @@ by querying it instead of needing the local files.
 
 | Tool | Returns |
 |------|---------|
-| `fw:list_docs()` | All knowledge docs (`path`, `title`) |
-| `fw:get_doc(path)` | Full markdown of a doc |
-| `fw:search(query, max_results=8)` | Matching `{path, line, snippet}` across all docs |
-| `fw:get_provisioning_guide()` | `docs/12-auto-provisioning-workflow.md` |
-| `fw:get_sop_guide()` | `docs/13-crm-sop-template-and-product-setup.md` |
-| `fw:get_gate_status()` | `docs/GATE_EXECUTION_LOG.md` |
-| `fw:get_pin_map()` | `docs/11-pin-mapping-rak4630-rak19007.md` |
+| `list_docs()` | All knowledge docs (`path`, `title`) |
+| `get_doc(path)` | Full markdown of a doc |
+| `search(query, max_results=8)` | Matching `{path, line, snippet}` across all docs |
+| `get_provisioning_guide()` | `docs/12-auto-provisioning-workflow.md` |
+| `get_sop_guide()` | `docs/13-crm-sop-template-and-product-setup.md` |
+| `get_gate_status()` | `docs/GATE_EXECUTION_LOG.md` |
+| `get_pin_map()` | `docs/11-pin-mapping-rak4630-rak19007.md` |
 
-(`fw:` is the gateway prefix configured in `proxy-config.json`.)
+## Accessing through the gateway
+
+This gateway does **not** flatten upstream tools into the top-level `tools/list`; it exposes
+**meta-tools**. Reach the knowledge server (registered as `firmware-knowledge`, prefix `fw`)
+via:
+
+- `discover_upstream_tools(server_name="firmware-knowledge")` → lists the tools above.
+- `call_upstream_tool(server_name="firmware-knowledge", tool_name="get_provisioning_guide", arguments={})`
+  → invokes a tool.
+
+`list_upstream_servers()` confirms it's registered.
 
 ## Architecture
 

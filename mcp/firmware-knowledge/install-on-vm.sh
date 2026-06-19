@@ -29,8 +29,10 @@ echo ">> install deps + systemd + register upstream on $VM"
 ssh "$VM" "PORT='$PORT' KNOW_DIR='$KNOW_DIR' SRV_DIR='$SRV_DIR' bash -s" <<'REMOTE'
 set -euo pipefail
 SUDO=""; [ "$(id -u)" = 0 ] || SUDO="sudo"
-cd "$SRV_DIR"
-/home/mcp/.local/bin/uv sync
+# Files synced over root SSH are root-owned; the service runs as mcp, so hand
+# ownership back and run uv sync as mcp (uv + venv live in mcp's home).
+$SUDO chown -R mcp:mcp "$KNOW_DIR" "$SRV_DIR"
+sudo -u mcp bash -c "cd '$SRV_DIR' && /home/mcp/.local/bin/uv sync"
 
 $SUDO tee /etc/systemd/system/mcp-firmware-knowledge.service >/dev/null <<UNIT
 [Unit]
