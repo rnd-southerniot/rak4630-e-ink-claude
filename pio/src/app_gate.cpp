@@ -607,6 +607,18 @@ static void gate_tick_9(app_gate_ctx_t *ctx, uint64_t now_ms)
 
     lorawan_metrics_t m = {};
     lorawan_service_get_metrics(&m);
+
+#if defined(APP_GATE9_CONTINUOUS) && APP_GATE9_CONTINUOUS
+    /* Deployed mode: never halt. Keep sampling sensor + battery and uplinking to
+     * the gateway on the period, indefinitely. The throttled progress log carries
+     * ongoing evidence — uplink_ok climbs every APP_GATE_UPLINK_PERIOD_MS. */
+    gate_log_progress(ctx, now_ms,
+                      "live_publish_running expected=%d sensor_ok=%lu display_updates=%lu joined=%d uplink_ok=%lu battery_mv=%u",
+                      APP_GATE9_EXPECTED_DEVICES, (unsigned long)ctx->sensor_ok,
+                      (unsigned long)ctx->display_updates, lorawan_service_is_joined(),
+                      (unsigned long)m.uplink_ok,
+                      (unsigned)(ctx->latest_sample.battery_v * 1000.0f));
+#else
     gate_log_progress(ctx, now_ms,
                       "sensor_ok=%lu display_updates=%lu joined=%d uplink_ok=%lu expected=%d",
                       (unsigned long)ctx->sensor_ok, (unsigned long)ctx->display_updates,
@@ -617,6 +629,7 @@ static void gate_tick_9(app_gate_ctx_t *ctx, uint64_t now_ms)
                        APP_GATE9_EXPECTED_DEVICES, (unsigned long)ctx->sensor_ok,
                        (unsigned long)ctx->display_updates, (unsigned long)m.uplink_ok);
     }
+#endif
 }
 
 static bool gate_requires_i2c(app_gate_t gate)

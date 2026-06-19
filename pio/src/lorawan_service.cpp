@@ -24,18 +24,11 @@
 #include <LoRaWan-Arduino.h>
 
 #include "lorawan_service.h"
+#include "board.h"
 
-/*
- * The SX126x-Arduino library declares SPI_LORA as `extern` and only defines it
- * for variants that set _VARIANT_RAK4630_. Our board variant identifies as
- * _VARIANT_RAK4631_, so we provide the definition here — matching the library's
- * own RAK4630 LoRa-SPI pin map (NRF_SPIM2, MISO=P1.13/45, SCK=P1.11/43,
- * MOSI=P1.12/44; see RAK4630_MOD.cpp). Guarded so it never double-defines if a
- * future variant supplies _VARIANT_RAK4630_.
- */
-#if defined(NRF52_SERIES) && !defined(_VARIANT_RAK4630_)
-SPIClass SPI_LORA(NRF_SPIM2, 45, 43, 44);
-#endif
+/* The SX1262 radio bring-up (pins, SPI, TCXO, antenna switch) is board-specific
+ * and lives in the board package (src/board/<board>/). lorawan_service is now
+ * board-agnostic: it calls board_radio_init() then drives the shared LoRaMac. */
 
 static const char *TAG = "LORAWAN";
 
@@ -187,9 +180,7 @@ esp_err_t lorawan_service_init(void)
         return ESP_ERR_INVALID_ARG;
     }
 
-    uint32_t err = lora_rak4630_init();
-    if (err != 0) {
-        ESP_LOGE(TAG, "lora_rak4630_init_failed code=%lu", (unsigned long)err);
+    if (board_radio_init() != ESP_OK) {
         return ESP_FAIL;
     }
 
@@ -197,7 +188,7 @@ esp_err_t lorawan_service_init(void)
     lmh_setAppEui(s_join_eui);
     lmh_setAppKey(s_app_key);
 
-    err = lmh_init(&s_lmh_callbacks, s_lmh_param, true, CLASS_A, LORAMAC_REGION_AS923);
+    uint32_t err = lmh_init(&s_lmh_callbacks, s_lmh_param, true, CLASS_A, LORAMAC_REGION_AS923);
     if (err != 0) {
         ESP_LOGE(TAG, "lmh_init_failed code=%lu", (unsigned long)err);
         return ESP_FAIL;

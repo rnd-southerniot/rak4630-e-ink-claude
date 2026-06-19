@@ -27,25 +27,29 @@ esp_err_t i2c_bus_init(void)
      * this rail is switched by WB_IO2 (P1.02); without it the SGP40/BMP280 are
      * unpowered and never ACK on the I2C bus. The display gate already asserts
      * this pin for the panel, but I2C-only gates must enable it themselves. */
-    pinMode(WB_IO2, OUTPUT);
-    digitalWrite(WB_IO2, HIGH);
+    pinMode(PIN_SENSOR_PWR, OUTPUT);
+    digitalWrite(PIN_SENSOR_PWR, HIGH);
     delay(APP_SENSOR_POWER_SETTLE_MS);
 
+#if defined(ESP_PLATFORM)
+    /* ESP32 I2C is remappable — bind the bus pins; the core enables internal
+     * pull-ups itself, so we must NOT re-pinMode them (that detaches the bus). */
+    Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
+#else
+    /* nRF52: pins come from the variant. The Adafruit core does NOT enable
+     * internal I2C pull-ups — do it explicitly after Wire.begin() (configures the
+     * TWIM pins). ~13k is weak but adequate at 100 kHz; modules with their own
+     * pull-ups are unaffected. */
     Wire.begin();
-    Wire.setClock(APP_I2C_FREQ_HZ);
-
-    /* The nRF52 (Adafruit) core does NOT enable internal I2C pull-ups, unlike
-     * the ESP32 core. A hand-wired breakout without external pull-ups will leave
-     * SDA/SCL low and no device can ACK. Enable the internal pull-ups after
-     * Wire.begin() (which configures the TWIM pins). ~13k is weak but adequate
-     * for short wiring at 100 kHz. Modules with their own pull-ups are unaffected. */
     pinMode(PIN_I2C_SDA, INPUT_PULLUP);
     pinMode(PIN_I2C_SCL, INPUT_PULLUP);
+#endif
+    Wire.setClock(APP_I2C_FREQ_HZ);
 
     s_initialized = true;
 
-    ESP_LOGI(TAG, "init_ok sda=%d scl=%d freq_hz=%d sensor_pwr=WB_IO2(P1.02) int_pullups=on",
-             PIN_I2C_SDA, PIN_I2C_SCL, APP_I2C_FREQ_HZ);
+    ESP_LOGI(TAG, "init_ok sda=%d scl=%d freq_hz=%d sensor_pwr=%d int_pullups=on",
+             PIN_I2C_SDA, PIN_I2C_SCL, APP_I2C_FREQ_HZ, PIN_SENSOR_PWR);
     return ESP_OK;
 }
 

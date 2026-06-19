@@ -198,8 +198,8 @@ esp_err_t display_epd_ssd1680_init(const display_epd_ssd1680_config_t *cfg)
              cfg->pin_busy, cfg->busy_active_high, (int)hal_gpio_read(cfg->pin_busy),
              cfg->pwr_active_high, cfg->pwr_input_pullup, (int)hal_gpio_read(cfg->pin_pwr));
 
-    /* Initialize SPI */
-    hal_spi_begin();
+    /* Initialize SPI (pins applied on ESP32; fixed by variant on nRF52) */
+    hal_spi_begin(cfg->pin_sclk, cfg->pin_miso, cfg->pin_mosi);
 
     /* Hardware reset */
     epd_reset();

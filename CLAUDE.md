@@ -141,6 +141,7 @@ Keep credentials in `firmware/.env` (gitignored): `DEVEUI`, `APPKEY` (uppercase 
 ## Documentation
 
 - Architecture source of truth: `docs/02-data-flow.md`
+- Dual-board (RAK4630 + RAK3312): `docs/15-dual-board-rak4630-rak3312.md` (`pio run -e rak4631|rak3312`)
 - Auto-provisioning workflow: `docs/12-auto-provisioning-workflow.md`
 - CRM product/SOP-template setup: `docs/13-crm-sop-template-and-product-setup.md`
 - Open items tracker: `docs/05-information-needed.md`

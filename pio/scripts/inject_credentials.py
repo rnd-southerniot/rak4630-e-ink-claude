@@ -22,7 +22,14 @@ Import("env")  # noqa: F821  (injected by PlatformIO)
 
 PROJECT_DIR = env.subst("$PROJECT_DIR")  # noqa: F821
 REPO_ROOT = os.path.abspath(os.path.join(PROJECT_DIR, ".."))
-ENV_PATH = os.path.join(REPO_ROOT, "firmware", ".env")
+FW_DIR = os.path.join(REPO_ROOT, "firmware")
+
+# Each physical node has its own DevEUI/AppKey. Prefer a per-board file
+# firmware/.env.<pioenv> (e.g. .env.rak3312) so both boards keep distinct
+# credentials; fall back to the shared firmware/.env.
+PIOENV = env.subst("$PIOENV")  # noqa: F821
+_per_board = os.path.join(FW_DIR, ".env." + PIOENV)
+ENV_PATH = _per_board if os.path.isfile(_per_board) else os.path.join(FW_DIR, ".env")
 
 # key in .env -> (macro name, expected hex length in chars)
 FIELDS = {
@@ -49,10 +56,11 @@ def _load_env(path):
 
 
 def main():
+    rel = os.path.relpath(ENV_PATH, REPO_ROOT)
     values = _load_env(ENV_PATH)
     if not values:
-        print("inject_credentials: firmware/.env not found or empty "
-              "-> using placeholder keys (gates 6/7/9 will not join)")
+        print("inject_credentials: %s not found or empty "
+              "-> using placeholder keys (gates 6/7/9 will not join)" % rel)
         return
 
     flags = []
@@ -72,8 +80,8 @@ def main():
         env.Append(CPPDEFINES=[(macro, env.StringifyMacro(val))])  # noqa: F821
 
     if flags:
-        print("inject_credentials: injected %s from firmware/.env"
-              % ", ".join(m for m, _ in flags))
+        print("inject_credentials: injected %s from %s"
+              % (", ".join(m for m, _ in flags), rel))
 
 
 main()

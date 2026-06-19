@@ -23,17 +23,3 @@ bool hal_gpio_read(int pin)
 {
     return digitalRead(pin) == HIGH;
 }
-
-uint16_t hal_adc_read_raw_3v0(int pin, int samples)
-{
-    if (samples < 1) samples = 1;
-    analogReference(AR_INTERNAL_3_0);
-    analogReadResolution(12);
-
-    uint32_t acc = 0;
-    for (int i = 0; i < samples; i++) {
-        acc += (uint32_t)analogRead(pin);
-    }
-    analogReference(AR_DEFAULT);
-    return (uint16_t)(acc / (uint32_t)samples);
-}

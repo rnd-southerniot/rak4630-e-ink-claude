@@ -1,12 +1,18 @@
 #pragma once
 
 /*
- * ESP-IDF compatibility shim for Arduino/nRF52840 port.
- * Maps esp_err_t and related macros to simple int return codes.
+ * ESP-IDF compatibility shim. On nRF52 (no ESP-IDF) it defines esp_err_t and the
+ * error codes; on ESP32 the real ESP-IDF provides them, so we use those. The
+ * logging macros use our Serial.printf "[L] tag: ..." format on BOTH boards so
+ * the gate markers (result=PASS, handshake=...) parse identically everywhere.
  */
 
 #include <stdint.h>
 
+#if defined(ESP_PLATFORM)
+/* ESP32: real esp_err_t, ESP_OK/ESP_FAIL/ESP_ERR_*, esp_err_to_name, ESP_ERROR_CHECK. */
+#include <esp_err.h>
+#else
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -39,17 +45,6 @@ static inline const char *esp_err_to_name(esp_err_t err)
     }
 }
 
-/* Logging macros — map to Serial.printf */
-#ifndef LOG_TAG_LETTER
-#define LOG_TAG_LETTER(letter, tag, fmt, ...) \
-    do { Serial.printf("[%c] %s: " fmt "\r\n", letter, tag, ##__VA_ARGS__); } while(0)
-#endif
-
-#define ESP_LOGI(tag, fmt, ...)  LOG_TAG_LETTER('I', tag, fmt, ##__VA_ARGS__)
-#define ESP_LOGW(tag, fmt, ...)  LOG_TAG_LETTER('W', tag, fmt, ##__VA_ARGS__)
-#define ESP_LOGE(tag, fmt, ...)  LOG_TAG_LETTER('E', tag, fmt, ##__VA_ARGS__)
-
-/* Error check macros */
 #define ESP_ERROR_CHECK(x) do { \
     esp_err_t __err = (x); \
     if (__err != ESP_OK) { \
@@ -59,6 +54,34 @@ static inline const char *esp_err_to_name(esp_err_t err)
     } \
 } while(0)
 
+#ifdef __cplusplus
+}
+#endif
+#endif /* ESP_PLATFORM */
+
+/* Logging — our Serial.printf format on both boards (override ESP-IDF's if present). */
+#ifdef ESP_LOGI
+#undef ESP_LOGI
+#endif
+#ifdef ESP_LOGW
+#undef ESP_LOGW
+#endif
+#ifdef ESP_LOGE
+#undef ESP_LOGE
+#endif
+
+#ifndef LOG_TAG_LETTER
+#define LOG_TAG_LETTER(letter, tag, fmt, ...) \
+    do { Serial.printf("[%c] %s: " fmt "\r\n", letter, tag, ##__VA_ARGS__); } while(0)
+#endif
+
+#define ESP_LOGI(tag, fmt, ...)  LOG_TAG_LETTER('I', tag, fmt, ##__VA_ARGS__)
+#define ESP_LOGW(tag, fmt, ...)  LOG_TAG_LETTER('W', tag, fmt, ##__VA_ARGS__)
+#define ESP_LOGE(tag, fmt, ...)  LOG_TAG_LETTER('E', tag, fmt, ##__VA_ARGS__)
+
+#ifdef ESP_RETURN_ON_ERROR
+#undef ESP_RETURN_ON_ERROR
+#endif
 #define ESP_RETURN_ON_ERROR(x, tag, msg) do { \
     esp_err_t __err = (x); \
     if (__err != ESP_OK) { \
@@ -66,7 +89,3 @@ static inline const char *esp_err_to_name(esp_err_t err)
         return __err; \
     } \
 } while(0)
-
-#ifdef __cplusplus
-}
-#endif
