@@ -13,6 +13,8 @@
 
 #include "app_gate.h"
 #include "heartbeat.h"
+#include "hal_gpio.h"
+#include "board_pins.h"
 
 static app_gate_ctx_t gate_ctx;
 
@@ -37,11 +39,11 @@ void setup()
     if (err != ESP_OK) {
         Serial.printf("[E] APP: gate_init_failed err=%s\r\n", esp_err_to_name(err));
         /* Fatal — halt with error LED blink */
-        pinMode(LED_GREEN, OUTPUT);
+        hal_gpio_mode(PIN_LED_GREEN, HAL_GPIO_OUTPUT);
         while (1) {
-            digitalWrite(LED_GREEN, HIGH);
+            hal_gpio_write(PIN_LED_GREEN, true);
             delay(100);
-            digitalWrite(LED_GREEN, LOW);
+            hal_gpio_write(PIN_LED_GREEN, false);
             delay(100);
         }
     }
