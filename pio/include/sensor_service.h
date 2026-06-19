@@ -22,6 +22,8 @@ extern "C" {
 esp_err_t sensor_service_init(void);
 bool sensor_service_is_sgp40_present(void);
 bool sensor_service_is_bmp280_present(void);
+bool sensor_service_is_shtc3_present(void);
+esp_err_t sensor_service_read_humidity(float *humidity_rh);
 esp_err_t sensor_service_read_identity(sensor_identity_t *identity);
 esp_err_t sensor_service_read_sgp40_identity(sensor_identity_t *identity);
 esp_err_t sensor_service_read_bmp280_identity(sensor_identity_t *identity);
