@@ -12,6 +12,12 @@
 
 static const char *TAG = "DISPLAY";
 
+/* Full-refresh BUSY wait budget. Tri-color SSD1680 panels can take >10 s for a
+ * full update, so this is configurable and defaults well above the mono case. */
+#ifndef APP_DISPLAY_REFRESH_TIMEOUT_MS
+#define APP_DISPLAY_REFRESH_TIMEOUT_MS 20000
+#endif
+
 #define EPD_CMD_SW_RESET           0x12
 #define EPD_CMD_DRIVER_OUTPUT_CONTROL 0x01
 #define EPD_CMD_DATA_ENTRY_MODE    0x11
@@ -271,7 +277,7 @@ esp_err_t display_epd_ssd1680_draw_frame_dual(const uint8_t *bw_framebuffer, con
     ESP_RETURN_ON_ERROR(epd_send_data(&update, 1), TAG, "update_ctl2_data_failed");
     ESP_RETURN_ON_ERROR(epd_send_cmd(EPD_CMD_MASTER_ACTIVATE), TAG, "master_activate_failed");
     bool saw_busy = false;
-    ESP_RETURN_ON_ERROR(epd_wait_idle(5000, &saw_busy), TAG, "refresh_busy_timeout");
+    ESP_RETURN_ON_ERROR(epd_wait_idle(APP_DISPLAY_REFRESH_TIMEOUT_MS, &saw_busy), TAG, "refresh_busy_timeout");
     s_epd.refresh_busy_pulse_seen = saw_busy;
     ESP_LOGI(TAG, "probe_refresh_busy_pulse seen=%d", saw_busy);
     if (!saw_busy) {

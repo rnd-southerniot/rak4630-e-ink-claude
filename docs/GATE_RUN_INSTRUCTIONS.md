@@ -2,49 +2,42 @@
 
 ## 1) Environment
 
+PlatformIO is invoked directly; no shell environment export is required. All commands run from the repo `pio/` directory:
+
 ```bash
-export IDF_PYTHON_ENV_PATH=/Users/arif/.espressif/python_env/idf5.5_py3.14_env
-source /Users/arif/esp/esp-idf/export.sh
+cd pio/
 ```
+
+The PlatformIO binary lives at `~/.platformio/penv/bin/pio`. The first build performs a one-time board/variant install as described in the `pio/platformio.ini` header.
 
 ## 2) Preflight (Always)
 
-1. Open `docs/11-pin-mapping-rak3312-rak19007.md`.
+1. Open `docs/11-pin-mapping-rak4630-rak19007.md` (source of truth: `pio/variants/WisCore_RAK4631_Board/variant.h` and `pio/include/board_pins.h`).
 2. Confirm the selected gate pin mapping.
 3. Confirm serial port (example: `/dev/cu.usbmodem1101`).
 
 ## 3) Gate Selection
 
-Canonical mode (default):
+Edit the `-DAPP_GATE=N` build flag in `pio/platformio.ini`. `N` is `0..9`, or `21` for Gate 2.1:
 
-```bash
-perl -pi -e 's/^CONFIG_APP_GATE_ID_SCHEME_NEW=.*/CONFIG_APP_GATE_ID_SCHEME_NEW=y/; s/^# CONFIG_APP_GATE_ID_SCHEME_LEGACY is not set/# CONFIG_APP_GATE_ID_SCHEME_LEGACY is not set/; s/^CONFIG_APP_GATE=.*/CONFIG_APP_GATE=<0-9|21>/' firmware/sdkconfig
+```ini
+build_flags =
+    -DAPP_GATE=21
 ```
 
-`Gate 2.1` is selected by setting `CONFIG_APP_GATE=21`.
-
-Legacy mode:
-
-```bash
-perl -pi -e 's/^# CONFIG_APP_GATE_ID_SCHEME_LEGACY is not set/CONFIG_APP_GATE_ID_SCHEME_LEGACY=y/; s/^CONFIG_APP_GATE_ID_SCHEME_NEW=.*/# CONFIG_APP_GATE_ID_SCHEME_NEW is not set/; s/^CONFIG_APP_GATE_LEGACY=.*/CONFIG_APP_GATE_LEGACY=<0-8>/' firmware/sdkconfig
-```
+`Gate 2.1` is selected by setting `-DAPP_GATE=21`. Per-gate device expectations are set with `-DAPP_GATE2P1_EXPECTED_DEVICES`, `-DAPP_GATE3_EXPECTED_DEVICES`, `-DAPP_GATE4_EXPECTED_DEVICES`, and `-DAPP_GATE9_EXPECTED_DEVICES` (`1=SGP40`, `2=BMP280`, `3=both`).
 
 ## 4) Mandatory Gate Prompts
 
 - Gate 1 (`heartbeat`): no sensor prompt. Heartbeat only.
-  - Pin precheck: heartbeat primary `GPIO46` from `docs/11-pin-mapping-rak3312-rak19007.md`.
+  - Pin precheck: heartbeat primary `P1.03` (Green LED) from `docs/11-pin-mapping-rak4630-rak19007.md`.
   - Reusable one-command run:
     - `examples/gates/run_gate_1_heartbeat.sh /dev/cu.usbmodem1101`
   - Detailed walkthrough:
     - `examples/gates/GATE_1_HEARTBEAT_EXAMPLE.md`
-  - Set gate:
-
-```bash
-perl -pi -e 's/^CONFIG_APP_GATE=.*/CONFIG_APP_GATE=1/' firmware/sdkconfig
-```
-
+  - Set gate: edit `pio/platformio.ini` -> `-DAPP_GATE=1`.
   - Expected Gate 1 markers:
-    - `APP: heartbeat_started gpio=46`
+    - `APP: heartbeat_started pin=P1.03`
     - `APP: result=PASS gate=1 name=heartbeat ...`
     - `APP: handshake=STOP_AFTER_PASS gate=1 ...`
 - Gate 2 (`display_smoke`): no sensor prompt. Display only.
@@ -58,66 +51,60 @@ perl -pi -e 's/^CONFIG_APP_GATE=.*/CONFIG_APP_GATE=1/' firmware/sdkconfig
     7. `DISPLAY: hello_world_render_ok`
   - Heartbeat LED is intentionally skipped on non-Gate1 runs:
     - `APP: heartbeat_skip gate=2 reason=non_heartbeat_gate`
-  - Force tri-color RAK14000 profile before rerun (validated baseline):
-
-```bash
-perl -pi -e 's/^CONFIG_APP_DISPLAY_PIN_CS=.*/CONFIG_APP_DISPLAY_PIN_CS=12/; s/^CONFIG_APP_DISPLAY_PIN_SCLK=.*/CONFIG_APP_DISPLAY_PIN_SCLK=13/; s/^CONFIG_APP_DISPLAY_PIN_MOSI=.*/CONFIG_APP_DISPLAY_PIN_MOSI=11/; s/^CONFIG_APP_DISPLAY_PIN_MISO=.*/CONFIG_APP_DISPLAY_PIN_MISO=-1/; s/^CONFIG_APP_DISPLAY_PIN_DC=.*/CONFIG_APP_DISPLAY_PIN_DC=21/; s/^CONFIG_APP_DISPLAY_PIN_RST=.*/CONFIG_APP_DISPLAY_PIN_RST=-1/; s/^CONFIG_APP_DISPLAY_PIN_BUSY=.*/CONFIG_APP_DISPLAY_PIN_BUSY=42/; s/^CONFIG_APP_DISPLAY_PIN_PWR=.*/CONFIG_APP_DISPLAY_PIN_PWR=14/; s/^CONFIG_APP_DISPLAY_XRAM_OFFSET=.*/CONFIG_APP_DISPLAY_XRAM_OFFSET=0/; s/^# CONFIG_APP_DISPLAY_BUSY_ACTIVE_HIGH is not set/# CONFIG_APP_DISPLAY_BUSY_ACTIVE_HIGH is not set/; s/^CONFIG_APP_DISPLAY_PWR_INPUT_PULLUP=.*/CONFIG_APP_DISPLAY_PWR_INPUT_PULLUP=y/' firmware/sdkconfig
-```
-
-  - If a thin vertical edge strip appears, test alternate offset:
-
-```bash
-perl -pi -e 's/^CONFIG_APP_DISPLAY_XRAM_OFFSET=.*/CONFIG_APP_DISPLAY_XRAM_OFFSET=1/' firmware/sdkconfig
-```
-
+  - Display SPI pins (IO slot, fixed in `pio/include/board_pins.h`): MOSI=P0.30, SCK=P0.03, CS=P0.26, DC=P0.17, BUSY=P0.04, PWR=P1.02.
   - Expected Gate 2 markers:
-    - `DISPLAY: power_on wb_io2=14 value=1 mode=input_pullup xram_offset=0`
+    - `DISPLAY: power_on pwr=P1.02 value=1 ...`
     - `DISPLAY: spi_bus_check spi_ok=1 ...`
     - `DISPLAY: init_ok panel=ssd1680 res=250x122`
     - `DISPLAY: hello_world_render_ok`
     - `APP: result=PASS gate=2 name=display_smoke ...`
-- Gate 2.1 (`i2c_smoke`): ask `1=SGP40`, `2=BMP280`, `3=both`, set:
+- Gate 2.1 (`i2c_smoke`): ask `1=SGP40`, `2=BMP280`, `3=both`, then set in `pio/platformio.ini`:
 
-```bash
-perl -pi -e 's/^CONFIG_APP_GATE=.*/CONFIG_APP_GATE=21/; s/^CONFIG_APP_GATE2P1_EXPECTED_DEVICES=.*/CONFIG_APP_GATE2P1_EXPECTED_DEVICES=<1|2|3>/' firmware/sdkconfig
+```ini
+-DAPP_GATE=21
+-DAPP_GATE2P1_EXPECTED_DEVICES=<1|2|3>
 ```
 
   - Expected Gate 2.1 markers:
     - `I2C: scan_found ...`
     - `APP: gate=2.1 name=i2c_smoke ...`
     - `APP: result=PASS gate=2.1 name=i2c_smoke ...`
-- Gate 3 (`i2c_presence`): ask `1=SGP40`, `2=BMP280`, `3=both`, set:
+- Gate 3 (`i2c_presence`): ask `1=SGP40`, `2=BMP280`, `3=both`, then set in `pio/platformio.ini`:
 
-```bash
-perl -pi -e 's/^CONFIG_APP_GATE3_EXPECTED_DEVICES=.*/CONFIG_APP_GATE3_EXPECTED_DEVICES=<1|2|3>/' firmware/sdkconfig
+```ini
+-DAPP_GATE=3
+-DAPP_GATE3_EXPECTED_DEVICES=<1|2|3>
 ```
 
   - Reusable one-command run:
     - `examples/gates/run_gate_3_i2c_presence.sh /dev/cu.usbmodem1101 1`
   - Detailed walkthrough:
     - `examples/gates/GATE_3_I2C_PRESENCE_EXAMPLE.md`
+  - I2C pins: SDA=P0.13, SCL=P0.14 (SGP40 at 0x59, BMP280 at 0x76).
   - Expected Gate 3 markers:
     - `APP: gate=3 name=i2c_presence ...`
     - `I2C: scan_found addr=0x59` (SGP40 mode)
     - `APP: result=PASS gate=3 name=i2c_presence ...`
 
-- Gate 4 (`sensor_pipeline`): ask `1=SGP40`, `2=BMP280`, `3=both`, set:
+- Gate 4 (`sensor_pipeline`): ask `1=SGP40`, `2=BMP280`, `3=both`, then set in `pio/platformio.ini`:
 
-```bash
-perl -pi -e 's/^CONFIG_APP_GATE4_EXPECTED_DEVICES=.*/CONFIG_APP_GATE4_EXPECTED_DEVICES=<1|2|3>/' firmware/sdkconfig
+```ini
+-DAPP_GATE=4
+-DAPP_GATE4_EXPECTED_DEVICES=<1|2|3>
 ```
 
-  - For real SGP40 data path (not mock), use `CONFIG_APP_GATE4_EXPECTED_DEVICES=1` and confirm:
+  - For real SGP40 data path (not mock), use `-DAPP_GATE4_EXPECTED_DEVICES=1` and confirm:
     - `SENSOR: sgp40_data raw=... voc_index=...`
   - Reusable one-command run:
     - `examples/gates/run_gate_4_sensor_pipeline.sh /dev/cu.usbmodem1101 1`
   - Detailed walkthrough:
     - `examples/gates/GATE_4_SENSOR_PIPELINE_EXAMPLE.md`
 
-- Gate 6, 7, 9: ask for OTAA credentials in `firmware/.env`:
+- Gate 6, 7, 9: ask for OTAA credentials in `firmware/.env` (gitignored, injected into the build by `pio/scripts/inject_credentials.py`):
   - `DEVEUI`
   - `APPKEY`
   - `JOINEUI=0000000000000000` (default)
+  - LoRaWAN is real SX126x-Arduino OTAA, region AS923-1, ChirpStack v4; uplinks are CONFIRMED (ACK-based).
   - Gate 6 reusable one-command run:
     - `examples/gates/run_gate_6_lorawan_join_uplink.sh /dev/cu.usbmodem1101`
   - Gate 6 detailed walkthrough:
@@ -131,10 +118,11 @@ perl -pi -e 's/^CONFIG_APP_GATE4_EXPECTED_DEVICES=.*/CONFIG_APP_GATE4_EXPECTED_D
   - Gate 8 detailed walkthrough:
     - `examples/gates/GATE_8_FUOTA_SCAFFOLD_EXAMPLE.md`
 
-- After Gate 8 PASS, before Gate 9: ask selected mode (`1|2|3`) and set:
+- After Gate 8 PASS, before Gate 9: ask selected mode (`1|2|3`) and set in `pio/platformio.ini`:
 
-```bash
-perl -pi -e 's/^CONFIG_APP_GATE9_EXPECTED_DEVICES=.*/CONFIG_APP_GATE9_EXPECTED_DEVICES=<1|2|3>/' firmware/sdkconfig
+```ini
+-DAPP_GATE=9
+-DAPP_GATE9_EXPECTED_DEVICES=<1|2|3>
 ```
 
   - Reusable one-command run:
@@ -144,9 +132,13 @@ perl -pi -e 's/^CONFIG_APP_GATE9_EXPECTED_DEVICES=.*/CONFIG_APP_GATE9_EXPECTED_D
 
 ## 5) Build / Flash / Monitor
 
+Run from the `pio/` directory. Serial monitor baud is `115200`:
+
 ```bash
-idf.py -C firmware build
-idf.py -C firmware -p /dev/cu.usbmodem1101 flash monitor
+cd pio/
+~/.platformio/penv/bin/pio run                          # build
+~/.platformio/penv/bin/pio run -t upload -t monitor     # flash + serial monitor
+~/.platformio/penv/bin/pio run -t clean && ~/.platformio/penv/bin/pio run   # clean build
 ```
 
 ## 6) Evidence Capture

@@ -1,5 +1,59 @@
 # Gate Execution Log (Canonical 0..9 + Gate 2.1)
 
+> **All evidence below the "RAK4630 nRF52840 Bring-Up" section is from the legacy
+> ESP-IDF / RAK3312 (ESP32-S3) hardware and is SUPERSEDED.** The firmware was
+> ported to Arduino/PlatformIO on RAK4630 (nRF52840) in Feb 2026; that port
+> invalidates the old PASS records (different MCU, pins, and serial markers).
+> Capture fresh evidence in the session block immediately below.
+
+## RAK4630 nRF52840 Bring-Up (2026-06) — ACTIVE
+
+Build/flash/monitor (PlatformIO, from `pio/`):
+`~/.platformio/penv/bin/pio run -t upload -t monitor`.
+Gate selection: `-DAPP_GATE=N` in `pio/platformio.ini` (or
+`examples/gates/set_gate_new.sh N`).
+
+### Run Metadata
+
+- Run date: 2026-06-19
+- Operator: Arif
+- Firmware commit: `24bc114` (working tree: real-OTAA rework, uncommitted)
+- Serial port: `/dev/cu.usbmodem1101`
+- Sensors wired (`1`=SGP40, `2`=BMP280, `3`=both): `2` (BME280, chip_id 0x60, hand-wired to baseboard I2C). Original SGP40 breakout was faulty. Gates 2.1/3/4/9 use devices=2.
+- ChirpStack device provisioned (DEVEUI in `firmware/.env`): `NO` (pending — required before gates 6/7/9)
+- RAK7266 gateway online in ChirpStack (AS923): `TBD`
+
+### Pre-flight (host + build) — verified 2026-06-19
+
+- Host tests: `PASS payload_encode_v1` + `PASS gate_id_legacy_map`.
+- Clean build `APP_GATE=0`: SUCCESS (PlatformIO, board `wiscore_rak4631`).
+- LoRaWAN backend build `APP_GATE=6` / `APP_GATE=9`: SUCCESS (real SX126x-Arduino
+  OTAA linked; flash ~20% vs ~10% for stub).
+
+### Gate Evidence (capture on hardware)
+
+| Gate | Config | Result (`PASS`/`FAIL`) | Key markers / notes |
+|------|--------|------------------------|---------------------|
+| 0 `env` | `APP_GATE=0` | PASS | `gate=0 halted_after_pass=1` (toolchain/boot OK on nRF52840) |
+| 1 `heartbeat` | `APP_GATE=1` | PASS | `heartbeat_started gpio=35` (P1.03); `result=PASS gate=1 heartbeat_ok toggles=6`; Green LED blink visually confirmed by operator |
+| 2 `display_smoke` | `APP_GATE=2` | PASS (fw) | Two fixes (one at a time): (1) `BUSY_ACTIVE_HIGH=0→1` fixed `sw_reset_busy_timeout`→`init_ok`; (2) refresh timeout `5000→20000ms` (`APP_DISPLAY_REFRESH_TIMEOUT_MS`) fixed tri-color refresh (~15s/phase). `hello_world_render_ok`; `result=PASS gate=2`. HELLO/WORLD text visually confirmed by operator. |
+| 2.1 `i2c_smoke` | `APP_GATE=21`, devices=`2` | PASS | With BMP280 (replaced faulty SGP40 breakout): `scan_found addr=0x76`; `found=1 bmp280=1`; `result=PASS gate=2.1`. Confirms fw fixes were correct (sensor rail WB_IO2/P1.02 + nRF52 internal pull-ups `int_pullups=on`). Earlier SGP40 `found=0` was a faulty/mis-wired non-RAK breakout — same bus reads BMP280 fine. |
+| 3 `i2c_presence` | `APP_GATE=3`, devices=`2` | PASS | `scan_found addr=0x76`; `result=PASS gate=3 presence_ok expected=2` |
+| 4 `sensor_pipeline` | `APP_GATE=4`, devices=`2` | PASS | fw fix: accept BME280 chip_id `0x60` (+0x58 BMP280) in `sensor_service.cpp`. `identity_bmp280 chip_id=0x60 chip_id_ok=1`; live `bmp280_data pressure=100120Pa temperature=31.44C`; `result=PASS gate=4 sensor_ok=3 sensor_fail=0` |
+| 5 `payload_v1` | `APP_GATE=5` | PASS | `payload_hex=01 27 10 00 01 8A 24 0B 54 0F A0 01`; `result=PASS gate=5 payload_encode_ok bytes=12` (matches host vector) |
+| 6 `lorawan_join_uplink` | `APP_GATE=6` (+creds) | PASS | Device auto-provisioned via CRM onboarding workflow → ChirpStack 140 (task `cmqkvcmqa…`, DevEUI `F815C58DC40AC898`). `inject_credentials: injected …`; real `join_success attempts=1` (proves RAK7266 gateway live); `uplink_sent_confirmed` → `uplink_ack_ok uplink_ok=1` (confirmed downlink ACK); `result=PASS gate=6 joined=1 uplink_done=1` |
+| 7 `reliability_buffer` | `APP_GATE=7` (+creds) | PASS | `backend_active=0` → `buffer_store buffered=1`; after delay `backend_active=1` → `join_success` → `buffer_flush_ok flushed_count=1`; `result=PASS gate=7 buffered=1 flushed=1`; `uplink_ack_ok` |
+| 8 `fuota_scaffold` | `APP_GATE=8` | PASS | `manifest=placeholder-v1 region=AS923-1`; `fuota_scaffold_ready hooks=1 rollback=1`; `result=PASS gate=8` |
+| 9 `live_publish` | `APP_GATE=9`, devices=`2` (+creds) | PASS | Full cycle: live `bmp280_data` → `join_success` → `render_data voc=100.00 pressure=100077 temp=31.44 batt=4.10` → `uplink_sent_confirmed` → `uplink_ack_ok`; `result=PASS gate=9 sensor_ok=6 display_updates=1 uplink_ok=1`. With LiPo + `APP_BATTERY_ADC_ENABLED=1`: real `battery_adc raw=3232 battery_v=4.095` after fixing `PIN_BATTERY_VBAT` (was P1.00 = no ADC → 0; now WB_A0/P0.05/AIN3 per RAK example). VOC seeded 100 (no SGP40). |
+
+> Gate 6 & 9 PASS criteria require a **confirmed-uplink ACK** (`uplink_ack_ok`),
+> not just transmit — verify the frame + 12-byte payload in the ChirpStack device
+> event log (10.10.8.140).
+
+---
+
+## Legacy ESP-IDF / RAK3312 Evidence (SUPERSEDED)
+
 ## Fresh Rerun Requirement
 
 This log tracks the required full rerun after inserting Gate 2 (`display_smoke`) and adding Gate 2.1 (`i2c_smoke`) in canonical mode.

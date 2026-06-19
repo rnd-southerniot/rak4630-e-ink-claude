@@ -1,4 +1,10 @@
-# RAK3312 + RAK19007 Pin Mapping (Source of Truth)
+# RAK3312 + RAK19007 Pin Mapping (LEGACY — ESP-IDF / ESP32-S3)
+
+> **LEGACY / SUPERSEDED.** This maps the old ESP-IDF "RAK3312" (ESP32-S3) build
+> and does **not** apply to the current RAK4630 (nRF52840) PlatformIO firmware.
+> For the active pin map see **[11-pin-mapping-rak4630-rak19007.md](11-pin-mapping-rak4630-rak19007.md)**
+> (source of truth: `pio/variants/WisCore_RAK4631_Board/variant.h`). Kept for
+> historical reference only.
 
 Last updated: 2026-02-16
 

@@ -29,8 +29,11 @@
 #define PIN_EPD_PWR         WB_IO2          /* P1.02 — 3V3_S power enable */
 
 /* --- Battery ADC --- */
-/* nRF52840 VBAT measurement: read on PIN_VBAT (P1.00 = pin 32) */
-#define PIN_BATTERY_VBAT    PIN_VBAT        /* Defined in BSP variant.h */
+/* nRF52840 VBAT measurement: the RAK4631 routes the battery divider to WB_A0
+ * (P0.05 / AIN3). The variant's PIN_VBAT (P1.00) has NO ADC channel and reads 0.
+ * Source of truth: RAKwireless WisBlock RAK4630_Battery_Level_Detect example
+ * (#define PIN_VBAT WB_A0). */
+#define PIN_BATTERY_VBAT    WB_A0           /* P0.05 / AIN3 */
 
 /* Battery ADC constants for nRF52840 (3.6V reference, 1/6 gain, 14-bit) */
 #define VBAT_DIVIDER_COMP   1.73f           /* Compensation for voltage divider */

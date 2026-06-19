@@ -283,7 +283,10 @@ esp_err_t sensor_service_read_identity(sensor_identity_t *identity)
         ESP_LOGW(TAG, "bmp280_chip_id_read_failed err=%s", esp_err_to_name(err));
         return err;
     }
-    identity->bmp280_chip_id_ok = (identity->bmp280_chip_id == 0x58);
+    /* Accept BMP280 (0x58) and BME280 (0x60). The BME280 is register-compatible
+     * for temperature/pressure (adds humidity, which this node does not use). */
+    identity->bmp280_chip_id_ok = (identity->bmp280_chip_id == 0x58 ||
+                                   identity->bmp280_chip_id == 0x60);
 
     ESP_LOGI(TAG, "identity sgp40_serial_ok=%d serial_words=%04X-%04X-%04X bmp280_chip_id=0x%02X bmp280_id_ok=%d",
              identity->sgp40_serial_ok,
@@ -328,7 +331,10 @@ esp_err_t sensor_service_read_bmp280_identity(sensor_identity_t *identity)
         ESP_LOGW(TAG, "bmp280_chip_id_read_failed err=%s", esp_err_to_name(err));
         return err;
     }
-    identity->bmp280_chip_id_ok = (identity->bmp280_chip_id == 0x58);
+    /* Accept BMP280 (0x58) and BME280 (0x60). The BME280 is register-compatible
+     * for temperature/pressure (adds humidity, which this node does not use). */
+    identity->bmp280_chip_id_ok = (identity->bmp280_chip_id == 0x58 ||
+                                   identity->bmp280_chip_id == 0x60);
     ESP_LOGI(TAG, "identity_bmp280 chip_id=0x%02X chip_id_ok=%d", identity->bmp280_chip_id, identity->bmp280_chip_id_ok);
     return identity->bmp280_chip_id_ok ? ESP_OK : ESP_ERR_INVALID_RESPONSE;
 }

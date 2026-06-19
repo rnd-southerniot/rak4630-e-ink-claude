@@ -4,9 +4,9 @@ This folder contains reusable gate test scripts.
 
 ## Files
 
-- `set_gate_new.sh`: set canonical gate `0..9`, plus `2.1` alias (`21`) for I2C smoke.
-- `set_gate_legacy.sh`: set legacy gate `0..8` with compatibility mapping.
-- `run_gate.sh`: export ESP-IDF, build, flash, monitor.
+- `set_gate_new.sh`: set canonical gate `0..9`, plus `2.1` alias (`21`) for I2C smoke — edits `-DAPP_GATE` in `pio/platformio.ini`.
+- `set_gate_legacy.sh`: **legacy ESP-IDF only** (edits `firmware/sdkconfig`); not used by the PlatformIO build.
+- `run_gate.sh`: PlatformIO build, flash, and monitor (`pio run -t upload -t monitor`).
 - `run_gate_1_heartbeat.sh`: one-command Gate 1 (heartbeat).
 - `run_gate_2_display.sh`: one-command Gate 2 (E-Ink display smoke).
 - `run_gate_2_1_i2c.sh`: one-command Gate 2.1 (I2C smoke).
