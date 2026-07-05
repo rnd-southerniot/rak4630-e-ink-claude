@@ -17,16 +17,28 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def catalog_entry(doc: dict) -> dict:
-    return {
+    dev = doc["device"]
+    bus = doc["bus"]
+    model = dev["model"]
+    # manufacturer: explicit device.manufacturer, else the model's first token (e.g. "Bosch").
+    manufacturer = dev.get("manufacturer") or (model.split(" ", 1)[0] if model else "")
+    entry = {
         "profileKey": doc["profile_id"],
-        "model": doc["device"]["model"],
-        "deviceByte": doc["device"]["type_byte"],
-        "sensorType": doc["device"].get("sensor_type"),
-        "bus": doc["bus"]["kind"],
+        "displayName": dev.get("display_name") or model,
+        "manufacturer": manufacturer,
+        "model": model,
+        "deviceByte": dev["type_byte"],
+        "sensorType": dev.get("sensor_type"),
+        "bus": bus["kind"],
         "measurands": [m["key"] for m in doc["measurands"]],
         "payloadBytes": doc["payload"]["total_len"],
+        "isActive": dev.get("active", True),
         "blobHex": build_blob(profile_from_json(doc)).hex(),
     }
+    # i2cAddr only for I2C profiles — the CRM firmware-service reads it into SensorV2.i2c.addr.
+    if bus["kind"] == "i2c":
+        entry["i2cAddr"] = bus["addr"]
+    return entry
 
 
 def main() -> int:

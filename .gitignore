@@ -20,3 +20,6 @@ firmware/main/lora_credentials.h
 # Python
 __pycache__/
 *.pyc
+
+# Packaged artifacts (tools/package_artifact.sh)
+dist/
