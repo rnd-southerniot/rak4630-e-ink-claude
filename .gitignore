@@ -15,3 +15,4 @@ pio/.pio/
 # Secrets
 firmware/.env
 firmware/.env.*
+firmware/main/lora_credentials.h

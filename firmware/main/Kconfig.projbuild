@@ -1,5 +1,15 @@
 menu "RAK4630 E-Ink Node"
 
+config APP_LORA_SMOKE
+    bool "P2 LoRa smoke: SX1262 OTAA join + periodic uplink (bypass gate runner)"
+    default n
+    help
+        Bench bring-up for the SX1262 LoRaWAN stack (careflow RadioLib+EspHalS3 port).
+        When set, app_main bypasses the gate runner and runs lora_init -> OTAA join
+        (indefinite backoff) -> periodic unconfirmed uplink on fPort 1. Requires real
+        OTAA creds in firmware/main/lora_credentials.h and the device registered in
+        ChirpStack (AS923). Placeholder creds cannot join.
+
 config APP_GATE
     int "Bring-up gate selector (0..9, plus 21 for Gate 2.1)"
     range 0 21
