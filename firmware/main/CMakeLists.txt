@@ -13,9 +13,12 @@ idf_component_register(
         "lora.cpp"
         "prov_console.cpp"
         "provisioning.c"
+        "profile_store.c"
+        "profile_reader.c"
         "sensirion_gas_index_algorithm.c"
     INCLUDE_DIRS
         "."
     REQUIRES
         driver esp_system esp_timer esp_driver_gpio nvs_flash console jgromes__radiolib
+        device_profile
 )

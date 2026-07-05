@@ -10,8 +10,12 @@
 #include "sdkconfig.h"
 
 #if CONFIG_APP_LORA_SMOKE
+#include "device_profile.h"
 #include "lora.h"
+#include "profile_reader.h"
+#include "profile_store.h"
 #include "prov_console.h"
+#include "telemetry.h"
 #endif
 
 static const char *TAG = "APP";
@@ -49,6 +53,20 @@ static void lora_field_run(void)
         }
     }
 
+    /* A provisioned device profile (ADR-006) drives a generic sensor read + ADR-005 encode; absent
+     * one, uplink a heartbeat test payload (prov-profile <hex> to enable real telemetry). */
+    static dp_profile_storage_t s_prof;
+    const bool have_profile = profile_store_load(&s_prof);
+    const device_profile_t *prof = have_profile ? &s_prof.profile : NULL;
+    if (have_profile) {
+        ESP_LOGW(TAG,
+                 "field profile: device_byte=0x%02X bus=%u sensor_type=%u %u meas -> %u B payload",
+                 prof->device_byte, prof->bus_kind, prof->sensor_type, prof->n_meas, prof->total_len);
+        ESP_ERROR_CHECK(profile_reader_init());
+    } else {
+        ESP_LOGW(TAG, "no device profile in NVS — heartbeat test payload (prov-profile to enable)");
+    }
+
     ESP_LOGW(TAG, "LoRa field: creds present -> init -> join -> uplink");
     ESP_ERROR_CHECK(lora_init());
     uint32_t backoff_s = 10;
@@ -60,8 +78,26 @@ static void lora_field_run(void)
         }
     }
     for (uint32_t i = 0;; ++i) {
-        const uint8_t pl[4] = {0xA5, (uint8_t)(i >> 8), (uint8_t)i, 0x5A};
-        lora_send(pl, sizeof(pl));
+        if (have_profile) {
+            float values[DP_MAX_MEAS];
+            uint8_t flags = 0;
+            if (profile_read(prof, values, DP_MAX_MEAS) != ESP_OK) {
+                flags |= TELEMETRY_FLAG_STALE;
+                ESP_LOGW(TAG, "sensor read failed -> STALE");
+            }
+            uint8_t buf[64];
+            const size_t len = dp_encode_payload(prof, values, flags, buf, sizeof(buf));
+            ESP_LOGI(TAG, "[%lu] profile dev=0x%02X %u meas v[0]=%.2f v[1]=%.2f -> %u B",
+                     (unsigned long)i, prof->device_byte, prof->n_meas,
+                     prof->n_meas > 0 ? (double)values[0] : 0.0, prof->n_meas > 1 ? (double)values[1] : 0.0,
+                     (unsigned)len);
+            if (len > 0) {
+                lora_send(buf, len);
+            }
+        } else {
+            const uint8_t pl[4] = {0xA5, (uint8_t)(i >> 8), (uint8_t)i, 0x5A};
+            lora_send(pl, sizeof(pl));
+        }
         vTaskDelay(pdMS_TO_TICKS(30000));
     }
 }

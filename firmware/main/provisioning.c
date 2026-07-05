@@ -22,6 +22,8 @@
 #include "freertos/task.h"
 #include "nvs.h"
 
+#include "profile_store.h"
+
 static const char *TAG = "prov";
 #define PROV_NS "prov"
 
@@ -72,6 +74,33 @@ static int cmd_lorawan(int argc, char **argv)
     return err == ESP_OK ? 0 : 1;
 }
 
+/* prov-profile <hexblob> — store a dp_serialize() device-profile blob (validated before persist). */
+static int cmd_profile(int argc, char **argv)
+{
+    if (argc != 2) {
+        printf("ERR usage: prov-profile <hexblob>\n");
+        return 1;
+    }
+    const size_t hexlen = strlen(argv[1]);
+    if (hexlen < 2 || (hexlen % 2) != 0 || (hexlen / 2) > PROFILE_BLOB_MAX) {
+        printf("ERR blob hex length %u invalid (max %u bytes)\n", (unsigned)hexlen,
+               (unsigned)PROFILE_BLOB_MAX);
+        return 1;
+    }
+    static uint8_t blob[PROFILE_BLOB_MAX];
+    const size_t nbytes = hexlen / 2;
+    if (!parse_hex_bytes(argv[1], blob, nbytes)) {
+        printf("ERR blob not valid hex\n");
+        return 1;
+    }
+    if (!profile_store_save(blob, nbytes)) {
+        printf("ERR profile rejected (bad version/CRC/bounds) or NVS error\n");
+        return 1;
+    }
+    printf("OK profile stored (%u B)\n", (unsigned)nbytes);
+    return 0;
+}
+
 static int cmd_show(int argc, char **argv)
 {
     (void)argc;
@@ -88,8 +117,15 @@ static int cmd_show(int argc, char **argv)
     size_t n = sizeof(ak);
     const bool hasak = (nvs_get_blob(h, "appkey", ak, &n) == ESP_OK && n == sizeof(ak));
     nvs_close(h);
-    printf("prov: deveui=%016llx joineui=%016llx appkey=%s\n", (unsigned long long)de,
+    uint8_t pdev = 0, pmeas = 0;
+    const bool hasprofile = profile_store_present(&pdev, &pmeas);
+    printf("prov: deveui=%016llx joineui=%016llx appkey=%s | profile=", (unsigned long long)de,
            (unsigned long long)je, hasak ? "set" : "unset");
+    if (hasprofile) {
+        printf("device_byte=0x%02X,%u measurands\n", (unsigned)pdev, (unsigned)pmeas);
+    } else {
+        printf("none\n");
+    }
     return 0;
 }
 
@@ -125,6 +161,9 @@ void provisioning_register_commands(void)
         {.command = "prov-lorawan",
          .help = "<deveui16> <joineui16> <appkey32> — set OTAA credentials",
          .func = cmd_lorawan},
+        {.command = "prov-profile",
+         .help = "<hexblob> — store a device-profile blob (validated)",
+         .func = cmd_profile},
         {.command = "prov-show",
          .help = "print current provisioning (appkey redacted)",
          .func = cmd_show},
