@@ -1,5 +1,14 @@
 # CLAUDE.md
 
+> **⚠ DIRECTION CHANGE (2026-07-05) — repo is consolidating onto ESP-IDF / ESP32-S3.**
+> This node's product is the **RAK3312 (ESP32-S3 + SX1262)**, built with **ESP-IDF v5.5.4** as the
+> single canonical path — aligned with `careflow-modbus-node` and the central CRM/ChirpStack
+> firmware-automation. The PlatformIO/Arduino + nRF52840 (RAK4631) tree under `pio/` is being
+> **retired** (tracked for removal in the consolidation phase). Sections below that call PlatformIO
+> "Primary" and ESP-IDF "Legacy" are **stale** and will be rewritten. New work happens in `firmware/`
+> (ESP-IDF). Migration plan: `~/.claude/plans/generic-jingling-owl.md`; new repo name:
+> **`senseflow-eink-node`**.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview

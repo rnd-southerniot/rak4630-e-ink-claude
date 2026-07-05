@@ -1,3 +1,35 @@
+# ── Base platform parity (ported from careflow-modbus-node) ───────────────────────────────────────
+# senseflow-eink-node: ESP32-S3 (RAK3312) + SX1262, ESP-IDF v5.5.4 single canonical path.
+CONFIG_IDF_TARGET="esp32s3"
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+
+# Console: the RAK3312 native USB enumerates as the ESP32-S3 USB-Serial-JTAG controller (same path
+# esptool flashes over) — required for the esp> provisioning console (P3). NOT USB-CDC/TinyUSB.
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
+CONFIG_BOOTLOADER_LOG_LEVEL_INFO=y
+
+# 1 kHz FreeRTOS tick — required for RadioLib LoRaWAN TxDone timing (P2); the 100 Hz default
+# undershoots the 10 ms scanGuard → RADIOLIB_ERR_TX_TIMEOUT. (careflow Phase-5 finding.)
+CONFIG_FREERTOS_HZ=1000
+
+# Resilience: Task-WDT initialised at boot (field task subscribes/feeds it in P3+); brownout at the
+# IDF ESP32-S3 default level so a sagging rail forces a clean, logged reset.
+CONFIG_ESP_TASK_WDT_INIT=y
+CONFIG_ESP_BROWNOUT_DET=y
+CONFIG_ESP_BROWNOUT_DET_LVL_SEL_7=y
+
+# OTA: dual-slot partition table + bootloader app rollback (nvs pinned at 0x9000 in partitions.csv
+# so provisioning + LoRaWAN nonces survive layout/OTA changes — no full erase).
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+
+# PSRAM: Octal. Confirmed on board 3c:dc:75:6f:80:e4 via esptool — "Embedded PSRAM 8MB (AP_3v3)" =
+# 8 MB Octal PSRAM @ 3.3 V (same S3R8-class SKU as careflow). No 8 MB Quad SKU exists.
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_OCT=y
+# ──────────────────────────────────────────────────────────────────────────────────────────────────
+
 CONFIG_APP_GATE=1
 CONFIG_APP_GATE_ID_SCHEME_NEW=y
 CONFIG_APP_GATE_TICK_MS=200

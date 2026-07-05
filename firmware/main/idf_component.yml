@@ -1,0 +1,5 @@
+## senseflow-eink-node managed-component manifest.
+## RadioLib (SX1262 LoRaWAN) is added in P2; led_strip is not needed (plain-GPIO heartbeat).
+dependencies:
+  idf:
+    version: ">=5.5.0"
