@@ -11,6 +11,7 @@
 
 #if CONFIG_APP_LORA_SMOKE
 #include "lora.h"
+#include "prov_console.h"
 #endif
 
 static const char *TAG = "APP";
@@ -32,14 +33,23 @@ static void log_deveui_from_mac(void)
 }
 
 #if CONFIG_APP_LORA_SMOKE
-/* P2 SX1262 LoRaWAN smoke: init -> OTAA join (indefinite backoff) -> periodic uplink. Bypasses the
- * gate runner; proves the ported RadioLib+EspHalS3 radio stack. Does not return. */
-static void lora_smoke_run(void)
+/* P2/P3 LoRa field path: start the esp> provisioning console, wait if unprovisioned, else init the
+ * SX1262 -> OTAA join (indefinite backoff) -> periodic uplink. Bypasses the gate runner. Credentials
+ * come from NVS 'prov' (console / CRM) with the compiled lora_credentials.h as fallback. No return. */
+static void lora_field_run(void)
 {
-    ESP_LOGW(TAG, "LORA SMOKE (P2): init -> join -> uplink loop");
+    ESP_ERROR_CHECK(prov_console_init()); /* esp> console runs on its own task — provision anytime */
+
     if (!lora_is_provisioned()) {
-        ESP_LOGW(TAG, "no OTAA creds (placeholder) — fill firmware/main/lora_credentials.h to join");
+        ESP_LOGW(TAG, "AWAITING PROVISIONING — NVS 'prov' empty and the compiled key is a placeholder.");
+        ESP_LOGW(TAG, "Provision over esp> :  prov creds <devEui> <joinEui> <appKey>  then  prov-done");
+        for (;;) {
+            ESP_LOGW(TAG, "AWAITING PROVISIONING (esp> prov creds ... ; prov-done)");
+            vTaskDelay(pdMS_TO_TICKS(30000));
+        }
     }
+
+    ESP_LOGW(TAG, "LoRa field: creds present -> init -> join -> uplink");
     ESP_ERROR_CHECK(lora_init());
     uint32_t backoff_s = 10;
     while (lora_join() != ESP_OK) {
@@ -68,7 +78,7 @@ void app_main(void)
     log_deveui_from_mac();
 
 #if CONFIG_APP_LORA_SMOKE
-    lora_smoke_run(); /* does not return */
+    lora_field_run(); /* does not return */
 #endif
 
     app_gate_ctx_t gate_ctx;
