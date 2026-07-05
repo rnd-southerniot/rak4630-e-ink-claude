@@ -16,3 +16,7 @@ pio/.pio/
 firmware/.env
 firmware/.env.*
 firmware/main/lora_credentials.h
+
+# Python
+__pycache__/
+*.pyc

@@ -1,0 +1,26 @@
+{
+  "profile_id": "bosch-bme280",
+  "schema_version": 2,
+  "device": {
+    "model": "Bosch BME280/BMP280",
+    "type_byte": 16,
+    "sensor_type": "bme280"
+  },
+  "bus": {
+    "kind": "i2c",
+    "addr": 118
+  },
+  "measurands": [
+    { "key": "temp",     "type": "float32", "scale": 1.0, "unit": "C" },
+    { "key": "pressure", "type": "float32", "scale": 1.0, "unit": "hPa" }
+  ],
+  "payload": {
+    "device_byte": 16,
+    "total_len": 7,
+    "fields": [
+      { "key": "temp",     "offset": 0, "encoding": "i16", "scale": 100.0 },
+      { "key": "pressure", "offset": 2, "encoding": "u16", "scale": 10.0 }
+    ]
+  },
+  "source": "Bosch BME280 datasheet; compensated read via firmware sensor_service_read_bmp280 (temp+pressure). Humidity would add a 3rd measurand once a BME280-specific driver read lands."
+}

@@ -1,0 +1,13 @@
+{
+  "profileKey": "bosch-bme280",
+  "model": "Bosch BME280/BMP280",
+  "deviceByte": 16,
+  "sensorType": "bme280",
+  "bus": "i2c",
+  "measurands": [
+    "temp",
+    "pressure"
+  ],
+  "payloadBytes": 7,
+  "blobHex": "02100176010000000000000000000000000007020200000004003f8000000000000000000004003f8000000000000000000342c8000001020241200000aa6b"
+}
