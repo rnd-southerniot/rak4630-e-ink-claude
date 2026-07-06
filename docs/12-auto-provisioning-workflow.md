@@ -1,5 +1,7 @@
 # Auto-Provisioning Workflow (CRM → ChirpStack → Firmware)
 
+> **⚠ Historical (pre-P6 / PlatformIO-nRF52).** This doc predates the ESP-IDF/ESP32-S3 consolidation and may reference the retired `pio/` tree, `-DAPP_GATE`, or SX126x-Arduino. Canonical build/flash/provision instructions now live in [CLAUDE.md](../CLAUDE.md) (ESP-IDF `firmware/` + Kconfig).
+
 How a RAK4630 LoRaWAN node gets its OTAA credentials **automatically** through the SIoT CRM
 onboarding workflow, and how those credentials reach the firmware. This is the proven
 proof-of-concept (validated end-to-end: real OTAA join + confirmed uplink on gates 6/7/9).

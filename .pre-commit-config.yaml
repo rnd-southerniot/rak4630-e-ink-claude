@@ -1,0 +1,21 @@
+# Pre-commit hooks for senseflow-eink-node (ESP-IDF / ESP32-S3).
+# Mirrors careflow-modbus-node, EXCEPT clang-format is intentionally not enforced yet: 21/38 firmware
+# C/C++ files predate the .clang-format style, so enabling -i here would produce a large reformat that
+# would fight in-flight CRM-team work. The .clang-format file is kept for editor integration; adopting
+# the hook is a separate, single-purpose "format the tree" PR the team signs off on.
+exclude: '^(firmware/managed_components/|tests/host/build/|firmware/build/|dist/)'
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-merge-conflict
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks

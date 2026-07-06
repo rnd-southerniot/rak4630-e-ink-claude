@@ -1,5 +1,7 @@
 # CLAUDE.md — Remediation Runbook: `rak4630-e-ink-claude` Code-Review Fixes
 
+> **⚠ Historical (pre-P6 / PlatformIO-nRF52).** This doc predates the ESP-IDF/ESP32-S3 consolidation and references the retired `pio/` tree. Canonical instructions now live in [CLAUDE.md](../CLAUDE.md) (ESP-IDF `firmware/` + Kconfig).
+
 > **Role:** Senior firmware/DevOps engineer executing a phase-gated remediation.
 > **Execution model:** Claude Code CLI runs each phase in order. Each phase is **one PR**, small and reversible. Do **not** advance past a gate whose smoke test fails. **Never push to remote unless explicitly instructed** — this runbook stops at "commit + open PR locally"; the human merges.
 > **Repo:** `rnd-southerniot/rak4630-e-ink-claude`

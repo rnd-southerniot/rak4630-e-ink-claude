@@ -3,10 +3,10 @@ firmware/build/
 firmware/sdkconfig
 firmware/sdkconfig.old
 firmware/.cache/
+# Managed components are fetched from dependencies.lock (the tracked pin) on build, like node_modules.
+managed_components/
 tests/host/.build/
-
-# PlatformIO build outputs
-pio/.pio/
+tests/host/build/
 
 # Local editor files
 .vscode/

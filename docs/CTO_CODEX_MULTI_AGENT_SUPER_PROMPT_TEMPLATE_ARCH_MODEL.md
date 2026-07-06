@@ -196,4 +196,3 @@ Current task: <REPLACE>
 Target gate: <REPLACE>
 Device mode (if needed): <1|2|3>
 ```
-

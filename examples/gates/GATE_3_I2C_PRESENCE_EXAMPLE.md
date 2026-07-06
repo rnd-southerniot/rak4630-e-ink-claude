@@ -39,7 +39,7 @@ Gate passes only if selected device mode is satisfied and PASS marker is logged.
 
 ## SGP40 Data Read Note
 
-Gate 3 validates bus presence only.  
+Gate 3 validates bus presence only.
 For actual SGP40 sensor data (`SENSOR: sgp40_data raw=... voc_index=...`), run Gate 4 in SGP40-only mode:
 
 ```bash
