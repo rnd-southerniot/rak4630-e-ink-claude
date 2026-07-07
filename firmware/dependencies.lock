@@ -13,9 +13,23 @@ dependencies:
       registry_url: https://components.espressif.com/
       type: service
     version: 7.7.1
+  siot-lorawan-node:
+    component_hash: 7a1de670cf98a9fa59123018a811edf185749e8955de6d1fcc71657de2022756
+    dependencies:
+    - name: idf
+      version: '>=5.5.0'
+    - name: jgromes/radiolib
+      version: ==7.7.1
+    source:
+      git: https://github.com/rnd-southerniot/siot-lorawan-node.git
+      path: .
+      type: git
+    targets:
+    - esp32s3
+    version: 99076ce26a41a48c1b44026a46fa30cbee275b00
 direct_dependencies:
 - idf
-- jgromes/radiolib
-manifest_hash: 5cd3b4b2848629d8fee8fcf4de4dd6d89bf0e189fb4c44f70c57d2bafe0c5c16
+- siot-lorawan-node
+manifest_hash: d16404b09e390fe1209cffbfd8309b069c1b7864c0e2a335568537d15b97f68b
 target: esp32s3
 version: 2.0.0
