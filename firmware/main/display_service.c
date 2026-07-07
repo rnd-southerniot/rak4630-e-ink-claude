@@ -5,14 +5,35 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "device_profile.h" /* dp_sensor_t */
 #include "display_epd_ssd1680.h"
 #include "display_font_5x7.h"
+#include "display_rows.h"
 #include "esp_check.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "profile_store.h"
+#include "sensor_service.h"
 
 static const char *TAG = "DISPLAY";
+
+/* Active I2C sensor_type driving the row set: the provisioned device-profile wins; absent a profile,
+ * infer from the detected sensor; else DP_SENSOR_NONE (legacy VOC/PRESS/TEMP rows). */
+static uint8_t active_sensor_type(void)
+{
+    static dp_profile_storage_t st;
+    if (profile_store_load(&st)) {
+        return st.profile.sensor_type;
+    }
+    if (sensor_service_is_bmp280_present()) {
+        return DP_SENSOR_BME280;
+    }
+    if (sensor_service_is_sgp40_present()) {
+        return DP_SENSOR_SGP40;
+    }
+    return DP_SENSOR_NONE;
+}
 
 #define PANEL_W_250 250
 #define PANEL_H_122 122
@@ -445,11 +466,7 @@ esp_err_t display_service_render(const sensor_sample_t *sample)
 
     ESP_RETURN_ON_ERROR(display_service_init(), TAG, "display_init_failed");
 
-    char line1[32] = {0};
-    char line2[32] = {0};
-    char line3[32] = {0};
-    char line4[32] = {0};
-    static const char *title = "SouthernIoT RnD";
+    static const char *title = "SIOT RnD Team";
     const int title_scale = 2;
     const int data_scale = 2;
     const int title_h = 7 * title_scale;
@@ -463,18 +480,30 @@ esp_err_t display_service_render(const sensor_sample_t *sample)
         title_x = 0;
     }
 
-    snprintf(line1, sizeof(line1), "VOC: %.1f", sample->voc_index);
-    snprintf(line2, sizeof(line2), "PRESS: %.0f", sample->pressure_pa);
-    snprintf(line3, sizeof(line3), "TEMP: %.2f", sample->temperature_c);
-    snprintf(line4, sizeof(line4), "BATT: %.2f", sample->battery_v);
+    /* Dynamic rows per the active I2C sensor_type (profile-driven; see display_rows.c). Clamp to what
+     * fits below the divider on the 122 px panel (line_y0=26, step=18 -> 5 rows -> last at y=98). */
+    disp_row_t rows[6];
+    int max_rows = (PANEL_H_122 - line_y0) / line_step; /* == 5 */
+    if (max_rows > (int)(sizeof(rows) / sizeof(rows[0]))) {
+        max_rows = (int)(sizeof(rows) / sizeof(rows[0]));
+    }
+    const int nrows = display_rows_build(active_sensor_type(), sample, rows, max_rows);
 
     framebuffer_clear_white();
     framebuffer_draw_text_scaled(title_x, title_y, title, PIXEL_BLACK, title_scale);
     framebuffer_fill_rect(0, divider_y, s_width, 2, PIXEL_RED);
-    framebuffer_draw_text_scaled(6, line_y0 + (line_step * 0), line1, PIXEL_BLACK, data_scale);
-    framebuffer_draw_text_scaled(6, line_y0 + (line_step * 1), line2, PIXEL_RED, data_scale);
-    framebuffer_draw_text_scaled(6, line_y0 + (line_step * 2), line3, PIXEL_BLACK, data_scale);
-    framebuffer_draw_text_scaled(6, line_y0 + (line_step * 3), line4, PIXEL_RED, data_scale);
+    for (int i = 0; i < nrows; ++i) {
+        char line[32];
+        if (rows[i].unit[0] != '\0') {
+            snprintf(line, sizeof(line), "%s: %.*f %s", rows[i].label, rows[i].decimals,
+                     (double)rows[i].value, rows[i].unit);
+        } else {
+            snprintf(line, sizeof(line), "%s: %.*f", rows[i].label, rows[i].decimals,
+                     (double)rows[i].value);
+        }
+        framebuffer_draw_text_scaled(6, line_y0 + (line_step * i), line,
+                                     (i % 2 == 0) ? PIXEL_BLACK : PIXEL_RED, data_scale);
+    }
 
     ESP_RETURN_ON_ERROR(display_flush(), TAG, "render_flush_failed");
     ESP_LOGI(

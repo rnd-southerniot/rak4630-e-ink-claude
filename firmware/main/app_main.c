@@ -10,8 +10,10 @@
 #include "sdkconfig.h"
 
 #if CONFIG_APP_LORA_SMOKE
+#include "app_types.h"
 #include "buttons.h"
 #include "device_profile.h"
+#include "display_service.h"
 #include "lora.h"
 #include "profile_reader.h"
 #include "profile_store.h"
@@ -95,6 +97,15 @@ static void lora_field_run(void)
             backoff_s = (backoff_s == 10) ? 30 : 60;
         }
     }
+    /* E-ink UI: render the "SIOT RnD Team" screen + live sensor rows. Refresh-gated (a tri-color
+     * refresh takes ~18 s) — forced on the first cycle so the panel shows immediately. Display init
+     * is NON-fatal: a panel glitch must not crash the node (LoRaWAN uplink keeps running). */
+    const bool display_ok = (display_service_init() == ESP_OK);
+    if (!display_ok) {
+        ESP_LOGW(TAG, "e-ink init failed — continuing without the UI (uplink unaffected)");
+    }
+    sensor_sample_t last_disp = {0};
+    uint64_t last_disp_ms = 0;
     for (uint32_t i = 0;; ++i) {
         if (have_profile) {
             float values[DP_MAX_MEAS];
@@ -111,6 +122,24 @@ static void lora_field_run(void)
                      (unsigned)len);
             if (len > 0) {
                 lora_send(buf, len);
+            }
+            /* Update the e-ink with the live reading (BME280: TEMP/PRESS rows + BATT). Refresh-gated;
+             * forced on the first cycle. profile values[0]=temp C, values[1]=pressure hPa. */
+            const sensor_sample_t sample = {
+                .temperature_c = prof->n_meas > 0 ? values[0] : 0.0f,
+                .pressure_pa = prof->n_meas > 1 ? values[1] * 100.0f : 0.0f,
+                .voc_index = 0.0f,
+                .battery_v = 3.95f, /* no battery ADC populated in the field path — default */
+                .valid = !(flags & TELEMETRY_FLAG_STALE),
+                .timestamp_ms = now_ms(),
+            };
+            if (display_ok &&
+                (i == 0 ||
+                 display_service_should_refresh(&last_disp, &sample, now_ms(), last_disp_ms))) {
+                if (display_service_render(&sample) == ESP_OK) {
+                    last_disp = sample;
+                    last_disp_ms = now_ms();
+                }
             }
         } else {
             const uint8_t pl[4] = {0xA5, (uint8_t)(i >> 8), (uint8_t)i, 0x5A};

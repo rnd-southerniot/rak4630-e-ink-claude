@@ -351,7 +351,9 @@ esp_err_t display_epd_ssd1680_draw_frame_dual(const uint8_t *bw_framebuffer, con
     ESP_RETURN_ON_ERROR(epd_send_data(&update, 1), TAG, "update_ctl2_data_failed");
     ESP_RETURN_ON_ERROR(epd_send_cmd(EPD_CMD_MASTER_ACTIVATE), TAG, "master_activate_failed");
     bool saw_busy = false;
-    ESP_RETURN_ON_ERROR(epd_wait_idle(5000, &saw_busy), TAG, "refresh_busy_timeout");
+    /* Tri-color (BWR) SSD1680 full refresh takes ~15-20 s — 5 s was far too short and reported a
+     * spurious refresh_busy_timeout while the panel was still updating. */
+    ESP_RETURN_ON_ERROR(epd_wait_idle(20000, &saw_busy), TAG, "refresh_busy_timeout");
     s_epd.refresh_busy_pulse_seen = saw_busy;
     ESP_LOGI(TAG, "probe_refresh_busy_pulse seen=%d", saw_busy);
     if (!saw_busy) {

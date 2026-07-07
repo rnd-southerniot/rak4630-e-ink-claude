@@ -8,6 +8,7 @@ idf_component_register(
         "i2c_bus.c"
         "sensor_service.c"
         "display_service.c"
+        "display_rows.c"
         "display_epd_ssd1680.c"
         "lorawan_service.c"
         "prov_console.cpp"
