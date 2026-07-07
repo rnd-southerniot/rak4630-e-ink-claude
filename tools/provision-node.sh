@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# Auto-provision a WisBlock node through the SIoT CRM onboarding workflow, which
-# registers the device in ChirpStack (AS923) and yields a DevEUI/AppKey that we
-# write to firmware/.env.<board> (consumed by pio/scripts/inject_credentials.py).
+# Auto-provision a node through the SIoT CRM onboarding workflow, which registers the device in
+# ChirpStack (AS923) and yields a DevEUI/AppKey written to firmware/.env.<board>. Those creds are then
+# injected into NVS by the ESP-IDF provisioner (`tools/provision_nvs.py --product senseflow` in the
+# careflow hub), NOT the retired pio inject_credentials.py.
+#
+# NOTE: for the RAK3312 (ESP-IDF) node, the central hub's `provision_node.py --product senseflow`
+# (careflow repo) is the canonical CRM-registration path; this script is kept for standalone use.
 #
 # The CRM backend is expected to already be running and wired to the target
 # ChirpStack (verify with GET /chirpstack/status).

@@ -1,0 +1,12 @@
+title = "senseflow-eink-node gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "project-wide allow-list"
+paths = [
+    # Placeholder-only files (real secrets live in gitignored firmware/.env and lora_credentials.h).
+    '''\.env\.example$''',
+    '''firmware/main/lora_credentials\.h\.example$''',
+]

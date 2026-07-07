@@ -100,4 +100,3 @@ static inline bool display_font_5x7_get(char c, uint8_t out[5])
         out[0] = 0x7F; out[1] = 0x41; out[2] = 0x5D; out[3] = 0x41; out[4] = 0x7F; return false;
     }
 }
-

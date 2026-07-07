@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "senseflow device profile (multi-bus, v2)",
+  "type": "object",
+  "required": ["profile_id", "schema_version", "device", "bus", "measurands", "payload"],
+  "properties": {
+    "profile_id": { "type": "string" },
+    "schema_version": { "const": 2 },
+    "device": {
+      "type": "object",
+      "required": ["model", "type_byte"],
+      "properties": {
+        "model": { "type": "string" },
+        "type_byte": { "type": "integer", "minimum": 1, "maximum": 255 },
+        "sensor_type": { "enum": ["none", "bme280", "sgp40", "shtc3"] }
+      }
+    },
+    "bus": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "addr"],
+          "properties": {
+            "kind": { "const": "i2c" },
+            "addr": { "type": "integer", "minimum": 1, "maximum": 127 }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "baud", "parity", "stop_bits"],
+          "properties": {
+            "kind": { "const": "modbus_rtu" },
+            "baud": { "type": "integer" },
+            "parity": { "enum": ["N", "E", "O"] },
+            "stop_bits": { "type": "integer" }
+          }
+        }
+      ]
+    },
+    "measurands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["key", "type", "scale"],
+        "properties": {
+          "key": { "type": "string" },
+          "type": { "enum": ["u16", "i16", "u32", "i32", "float32"] },
+          "scale": { "type": "number" },
+          "offset": { "type": "number" },
+          "unit": { "type": "string" }
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "required": ["device_byte", "total_len", "fields"],
+      "properties": {
+        "device_byte": { "type": "integer", "minimum": 1, "maximum": 255 },
+        "total_len": { "type": "integer", "minimum": 3, "maximum": 53 },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["key", "offset", "encoding", "scale"],
+            "properties": {
+              "key": { "type": "string" },
+              "offset": { "type": "integer", "minimum": 0 },
+              "encoding": { "enum": ["u8", "i8", "u16", "i16", "u32", "i32"] },
+              "scale": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "source": { "type": "string" }
+  }
+}

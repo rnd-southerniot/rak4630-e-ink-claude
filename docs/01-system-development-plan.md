@@ -1,5 +1,7 @@
 # System Development Plan (Arduino/PlatformIO + RAK4630 / nRF52840 + RAK19007 + RAK14000)
 
+> **⚠ Historical (pre-P6 / PlatformIO-nRF52).** This doc predates the ESP-IDF/ESP32-S3 consolidation and references the retired `pio/` tree. Canonical instructions now live in [CLAUDE.md](../CLAUDE.md) (ESP-IDF `firmware/` + Kconfig).
+
 > Note: The original ESP-IDF / RAK3312 (ESP32-S3) version of this plan is legacy and superseded. The firmware was ported to Arduino/PlatformIO targeting the RAK4630 (nRF52840) in Feb 2026; the ESP-IDF tree in `firmware/` is retained for reference only. The gate model and milestone plan below are preserved 1:1.
 
 ## 1) Objective

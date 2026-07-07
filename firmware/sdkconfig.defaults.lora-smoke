@@ -1,0 +1,5 @@
+# Bench profile: P2 SX1262 LoRaWAN smoke — OTAA join + periodic uplink, bypassing the gate runner.
+# Proves the ported RadioLib+EspHalS3 stack on the RAK3312 SX1262. Needs real OTAA creds in
+# firmware/main/lora_credentials.h and the device registered in ChirpStack (AS923).
+#   idf.py -C firmware -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.lora-smoke" build flash monitor
+CONFIG_APP_LORA_SMOKE=y

@@ -1,5 +1,7 @@
 # BRINGUP PLAN (Canonical Gate 0..9 + Gate 2.1)
 
+> **⚠ Historical (pre-P6 / PlatformIO-nRF52).** This doc predates the ESP-IDF/ESP32-S3 consolidation and may reference the retired `pio/` tree, `-DAPP_GATE`, or SX126x-Arduino. Canonical build/flash/provision instructions now live in [CLAUDE.md](../CLAUDE.md) (ESP-IDF `firmware/` + Kconfig).
+
 ## Operating Model
 
 - Single selected gate per firmware run.

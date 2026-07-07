@@ -1,0 +1,170 @@
+/*
+ * device_profile.h — data-driven device model: a profile (bus + measurand table + payload table)
+ * that one generic Modbus reader and one generic ADR-005 encoder consume at runtime (ADR-006).
+ *
+ * This header + device_profile.c are PURE C (no SDK) so the numeric core builds host-side under
+ * ctest. The on-target reader (increment 3) walks `meas[]` via modbus_master_read + dp_decode();
+ * the NVS loader (increment 2) populates a device_profile_t from a provisioned blob.
+ */
+#ifndef DEVICE_PROFILE_H
+#define DEVICE_PROFILE_H
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+/* Modbus register data type for a measurand. */
+typedef enum {
+    DP_U16 = 0,
+    DP_I16,
+    DP_U32,
+    DP_I32,
+    DP_F32,
+} dp_dtype_t;
+
+/* Word/byte order for 32-bit values across two registers. regs[0] is the lower wire address.
+ * Bytes are named A B C D from the most-significant on the wire: regs[0]=A B, regs[1]=C D. */
+typedef enum {
+    DP_ABCD = 0, /* big-endian: value = A B C D */
+    DP_CDAB,     /* word-swapped: value = C D A B (Selec MFM384) */
+    DP_BADC,     /* byte-swapped within words: value = B A D C */
+    DP_DCBA,     /* fully reversed: value = D C B A */
+} dp_word_t;
+
+/* Fixed-point encoding of a payload field on the wire. */
+typedef enum {
+    DP_ENC_U8 = 0,
+    DP_ENC_I8,
+    DP_ENC_U16,
+    DP_ENC_I16,
+    DP_ENC_U32,
+    DP_ENC_I32,
+} dp_enc_t;
+
+/* One measurand read from the device. engineering_value = raw * scale + offset. */
+typedef struct {
+    uint16_t reg;    /* wire (0-based) start address */
+    uint8_t fc;      /* 3 = holding, 4 = input registers */
+    dp_dtype_t type; /* register data type */
+    dp_word_t word;  /* word order (ignored for 16-bit types) */
+    float scale;     /* raw -> engineering multiplier */
+    float offset;    /* raw -> engineering offset */
+} dp_measurand_t;
+
+/* One field placed into the ADR-005 payload body. wire = round(values[value_index] * scale). */
+typedef struct {
+    uint8_t value_index; /* index into the measurand/values array */
+    uint8_t offset;      /* byte offset within the body (after the 3-byte header) */
+    dp_enc_t enc;        /* fixed-point wire encoding */
+    float scale;         /* engineering -> wire multiplier */
+} dp_field_t;
+
+/* Physical bus the profile reads over (multi-bus, v2). */
+typedef enum {
+    DP_BUS_MODBUS_RTU = 0, /* RS-485/Modbus register map (careflow) — data-driven read via meas[] */
+    DP_BUS_I2C = 1,        /* I2C sensor (senseflow) — read via the compiled driver for sensor_type */
+} dp_bus_t;
+
+/* Compiled sensor driver selector for DP_BUS_I2C. The generic reader dispatches on this to a
+ * per-sensor compensation driver (the I2C profile carries no raw register map). */
+typedef enum {
+    DP_SENSOR_NONE = 0,
+    DP_SENSOR_BME280 = 1, /* Bosch BME280/BMP280 (temp/pressure[/humidity]) */
+    DP_SENSOR_SGP40 = 2,  /* Sensirion SGP40 VOC index */
+    DP_SENSOR_SHTC3 = 3,  /* Sensirion SHTC3 temp/humidity */
+} dp_sensor_t;
+
+/*
+ * A complete device profile. Multi-bus (v2): bus_kind selects the read path.
+ *  - DP_BUS_MODBUS_RTU: baud/parity/default_fc/default_word + meas[] register map drive the generic
+ *    Modbus reader (slave/unit ID discovered by scan, intentionally absent).
+ *  - DP_BUS_I2C: i2c_addr + sensor_type select a compiled compensation driver that fills the
+ *    engineering values[]; the Modbus fields (baud/scan/meas registers) are unused.
+ * In both cases the ADR-005 payload table fields[] + dp_encode_payload/dp_simulate are identical.
+ */
+typedef struct {
+    uint8_t device_byte; /* ADR-005 payload device-type byte */
+    uint8_t bus_kind;    /* dp_bus_t */
+    uint8_t i2c_addr;    /* I2C 7-bit address (bus_kind == DP_BUS_I2C) */
+    uint8_t sensor_type; /* dp_sensor_t — compiled reader selector (bus_kind == DP_BUS_I2C) */
+    uint32_t baud;       /* Modbus bus baud rate (bus_kind == DP_BUS_MODBUS_RTU) */
+    char parity;         /* 'N' | 'E' | 'O' */
+    uint8_t stop_bits;   /* 1 | 2 */
+    uint8_t default_fc;  /* function code if a measurand leaves fc unset */
+    dp_word_t default_word;
+    uint8_t scan_fc; /* slave-ID discovery probe */
+    uint16_t scan_reg;
+    uint16_t scan_qty;
+    uint8_t n_meas;
+    const dp_measurand_t *meas;
+    uint8_t total_len; /* full payload length incl. 3-byte header (<= 53) */
+    uint8_t n_fields;
+    const dp_field_t *fields;
+} device_profile_t;
+
+/* Registers consumed by a data type: 1 for 16-bit, 2 for 32-bit/float. */
+uint8_t dp_dtype_regs(dp_dtype_t type);
+
+/*
+ * Decode `regs` (each already host-endian, big-endian-extracted by modbus_parse_read_response) into
+ * an engineering float. `regs` must hold dp_dtype_regs(type) words. Word order applies to 32-bit
+ * types only. Returns raw * scale + offset (float32 types: the IEEE-754 value * scale + offset).
+ */
+float dp_decode(const uint16_t *regs, dp_dtype_t type, dp_word_t word, float scale, float offset);
+
+/*
+ * Encode an ADR-005 payload from engineering `values` (indexed by dp_field_t.value_index) using the
+ * profile's payload table. Writes the 3-byte header [schema][device_byte][flags] then each field
+ * (big-endian, saturating, never wrapping). Returns profile->total_len, or 0 on bad args / cap too
+ * small / a field that runs past total_len.
+ */
+size_t dp_encode_payload(const device_profile_t *profile, const float *values, uint8_t flags,
+                         uint8_t *out, size_t cap);
+
+/*
+ * Fill `values[0..n_meas-1]` with plausible, deterministic, time-varying SIMULATED engineering data
+ * for a profile — so the profile → encode → decode path can be validated over LoRaWAN with NO
+ * physical device (any profile, incl. ones whose meter isn't on hand). Each carried measurand's
+ * magnitude is sized from its payload field (encoding + scale) so encoded values don't saturate and
+ * decode to moderate numbers; a per-field sinusoid gives variation. Not physically unit-accurate
+ * (the runtime profile has no units) — always tag the uplink TELEMETRY_FLAG_SIMULATED. Pure/no-I/O.
+ */
+void dp_simulate(uint32_t tick, const device_profile_t *p, float *values, size_t n_values);
+
+/* ---------------------------------------------------------------------------
+ * NVS profile blob (ADR-006 increment 2): a versioned, CRC-checked, endianness-
+ * independent serialization of a device_profile_t. The CRM serializes a profile and pushes the
+ * blob to the node (prov-profile console); the node deserializes it from NVS into backing storage.
+ * ------------------------------------------------------------------------- */
+
+#define DP_BLOB_VERSION 2u /* v2: multi-bus header (+bus_kind/i2c_addr/sensor_type). v1 rejected. */
+#define DP_MAX_MEAS 40u    /* worst case today = DSE (21); generous headroom */
+#define DP_MAX_FIELDS 40u
+
+/* Fixed blob layout sizes (big-endian, CRC-16/MODBUS trailer). */
+#define DP_BLOB_HEADER 21u   /* v2: version, device_byte, bus_kind, i2c_addr, sensor_type .. n_fields */
+#define DP_BLOB_MEAS_REC 13u /* reg(2) fc(1) type(1) word(1) scale(4) offset(4) */
+#define DP_BLOB_FIELD_REC 7u /* value_index(1) offset(1) enc(1) scale(4) */
+#define DP_BLOB_CRC 2u
+
+/* Backing storage for a deserialized profile (the device_profile_t points into these arrays). */
+typedef struct {
+    device_profile_t profile;
+    dp_measurand_t meas[DP_MAX_MEAS];
+    dp_field_t fields[DP_MAX_FIELDS];
+} dp_profile_storage_t;
+
+/* Byte length of the blob for a profile (or 0 if it exceeds DP_MAX_* bounds). */
+size_t dp_blob_size(const device_profile_t *p);
+
+/* Serialize `p` into `out`. Returns the blob length, or 0 on bad args / cap too small / bounds. */
+size_t dp_serialize(const device_profile_t *p, uint8_t *out, size_t cap);
+
+/*
+ * Deserialize a blob into `store` (fills store->meas/fields and points store->profile at them).
+ * Validates version, length, counts (<= DP_MAX_*), and the CRC. Returns true on success; on any
+ * failure returns false and `store` must not be used.
+ */
+bool dp_deserialize(const uint8_t *blob, size_t len, dp_profile_storage_t *store);
+
+#endif /* DEVICE_PROFILE_H */

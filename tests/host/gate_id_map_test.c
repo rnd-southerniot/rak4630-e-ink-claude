@@ -37,4 +37,3 @@ int main(void)
     printf("PASS gate_id_legacy_map deterministic vector\n");
     return 0;
 }
-

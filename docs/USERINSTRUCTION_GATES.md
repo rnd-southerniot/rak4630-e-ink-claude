@@ -1,5 +1,7 @@
 # User Instructions: Execute Gates (Prompt + VSCode)
 
+> **⚠ Historical (pre-P6 / PlatformIO-nRF52).** This doc predates the ESP-IDF/ESP32-S3 consolidation and may reference the retired `pio/` tree, `-DAPP_GATE`, or SX126x-Arduino. Canonical build/flash/provision instructions now live in [CLAUDE.md](../CLAUDE.md) (ESP-IDF `firmware/` + Kconfig).
+
 ## Prompt-Driven CLI Workflow
 
 1. Set the gate via `-DAPP_GATE=N` in `pio/platformio.ini` (`N` in `0..9`, or `21` for Gate 2.1).
