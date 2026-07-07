@@ -7,6 +7,13 @@
 > `pio-nrf52-archive` git tag if ever needed. New repo name: **`senseflow-eink-node`**.
 > Migration plan: `~/.claude/plans/generic-jingling-owl.md`.
 
+> **⚠ Shared LoRaWAN component (P7, 2026-07-08).** The RadioLib SX1262 LoRaWAN stack + OTA now live in
+> **`rnd-southerniot/siot-lorawan-node`** (private, `v0.1.0`), consumed via `firmware/main/idf_component.yml`
+> (git dep). `lora.cpp/.h` + `EspHalS3.h` are NO LONGER in this repo — edit them there and bump the
+> version. The CRM automation is centralized in **`rnd-southerniot/siot-node-firmware-automation`**
+> (the hub serves this product's telemetry via the model-B artifact from `tools/package_artifact.sh`).
+> This repo keeps its device-profile v2, display/gate/I²C code, and provisioning console.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
