@@ -10,7 +10,6 @@ idf_component_register(
         "display_service.c"
         "display_epd_ssd1680.c"
         "lorawan_service.c"
-        "lora.cpp"
         "prov_console.cpp"
         "provisioning.c"
         "profile_store.c"
@@ -19,6 +18,6 @@ idf_component_register(
     INCLUDE_DIRS
         "."
     REQUIRES
-        driver esp_system esp_timer esp_driver_gpio nvs_flash console jgromes__radiolib
+        driver esp_system esp_timer esp_driver_gpio nvs_flash console siot-lorawan-node
         device_profile
 )
