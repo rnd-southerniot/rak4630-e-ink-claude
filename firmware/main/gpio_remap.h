@@ -21,4 +21,10 @@
  * P2 join shows no RX (switch DIO2→explicit ANT_SW). */
 #define PIN_LORA_ANT_SW 4
 
+/* RAK14000 3-button module: S1/S2/S3 on WB_IO3/WB_IO5/WB_IO6 -> ESP32-S3 GPIO41/38/39 (RAK3312).
+ * Active-low with external pull-ups; FALLING-edge interrupt inputs (see buttons.c). */
+#define PIN_BTN_S1 41 /* WB_IO3 */
+#define PIN_BTN_S2 38 /* WB_IO5 */
+#define PIN_BTN_S3 39 /* WB_IO6 */
+
 #endif /* GPIO_REMAP_H */

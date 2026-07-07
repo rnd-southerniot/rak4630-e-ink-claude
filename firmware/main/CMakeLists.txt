@@ -14,6 +14,7 @@ idf_component_register(
         "provisioning.c"
         "profile_store.c"
         "profile_reader.c"
+        "buttons.c"
         "sensirion_gas_index_algorithm.c"
     INCLUDE_DIRS
         "."
