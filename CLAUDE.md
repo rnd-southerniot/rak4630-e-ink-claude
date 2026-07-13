@@ -6,6 +6,11 @@
 > PlatformIO/Arduino + nRF52840 (RAK4631) tree under `pio/` has been **removed**; recover it from the
 > `pio-nrf52-archive` git tag if ever needed. New repo name: **`senseflow-eink-node`**.
 > Migration plan: `~/.claude/plans/generic-jingling-owl.md`.
+>
+> **▶ Multi-repo platform:** this repo is senseflow **firmware only**. Platform / CRM / ChirpStack / deploy /
+> E2E / ops work + memory live under **`siot-ops`** — start there and read **`siot-ops/PLATFORM_MAP.md`** (repo
+> topology + "which repo do I start from?" router). This scope holds senseflow firmware memory (some entries
+> are still historical in the rak3112 scope, pending a move here).
 
 > **⚠ Shared LoRaWAN component (P7, 2026-07-08).** The RadioLib SX1262 LoRaWAN stack + OTA now live in
 > **`rnd-southerniot/siot-lorawan-node`** (private, `v0.1.0`), consumed via `firmware/main/idf_component.yml`
